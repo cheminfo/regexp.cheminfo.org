@@ -15,6 +15,12 @@ interface Props {
 // `void`, the implementation actually returns a cancellable Promise).
 type RegexperJob = Promise<{ warnings: string[] }> & { cancel: () => void };
 
+// regexper does not parse named capture groups (?<name>...) or named
+// backreferences \k<name>. Strip both so the diagram still renders.
+function stripNamedGroups(pattern: string): string {
+  return pattern.replaceAll(/\(\?<[^>]+>/g, '(').replaceAll(/\\k<[^>]+>/g, '');
+}
+
 /**
  * Render the regex as a railroad diagram using the `regexper` library
  * (same renderer as regexper.com). The diagram is rebuilt whenever the
@@ -30,6 +36,9 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pendingRenderRef = useRef<Promise<void>>(Promise.resolve());
   const [renderError, setRenderError] = useState<string | null>(null);
+
+  const stripped = stripNamedGroups(pattern);
+  const hasNamedGroups = stripped !== pattern;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -53,7 +62,7 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
       container.replaceChildren();
       setRenderError(null);
       job = renderRegex(
-        `/${pattern}/${flags}`,
+        `/${stripped}/${flags}`,
         container,
       ) as unknown as RegexperJob;
       try {
@@ -72,7 +81,7 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
       cancelled = true;
       job?.cancel();
     };
-  }, [pattern, flags, error]);
+  }, [stripped, flags, error, pattern]);
 
   let message: string | null = null;
   if (pattern === '') {
@@ -86,6 +95,11 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
   return (
     <div className="viz-diagram">
       <div ref={containerRef} />
+      {hasNamedGroups && !message && (
+        <div className="viz-note">
+          Named groups are shown as numbered groups in the diagram.
+        </div>
+      )}
       {message !== null && <div className="viz-empty">{message}</div>}
     </div>
   );
