@@ -389,7 +389,7 @@ body,
 
 .test-case {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 6px 10px;
   border-radius: 3px;
@@ -399,10 +399,114 @@ body,
   border: 1px solid #d3d8de;
 }
 
-.test-case .tc-text {
+.test-case .bp6-icon {
+  margin-top: 2px;
+}
+
+.test-case .tc-grid {
   flex: 1;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: start;
+  min-width: 0;
+}
+
+.test-case .tc-grid.tc-grid-single {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+@media (max-width: 720px) {
+  .test-case .tc-grid {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+}
+
+.test-case .tc-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #738694;
+  padding-top: 2px;
+}
+
+.visible-text {
+  display: block;
   white-space: pre-wrap;
   word-break: break-word;
+  padding: 2px 6px;
+  background: #ffffff;
+  border: 1px solid #d8e1e8;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 1.5em;
+}
+
+.visible-text.is-inline {
+  display: inline-block;
+  padding: 0 4px;
+  vertical-align: baseline;
+}
+
+.visible-text .ws {
+  color: #a7b6c2;
+  background: #eef2f6;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.failure-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.failure-detail {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 4px;
+  align-items: start;
+  padding: 8px 10px;
+  background: #fff1f2;
+  border: 1px solid #f1c5c8;
+  border-radius: 3px;
+}
+
+.failure-detail .fd-full {
+  grid-column: 2 / -1;
+}
+
+@media (max-width: 720px) {
+  .failure-detail {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+  .failure-detail .fd-full {
+    grid-column: 2 / -1;
+  }
+}
+
+.failure-detail .fd-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a4148;
+  padding-top: 4px;
+}
+
+.failure-detail .fd-error {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #5c2329;
+  padding-top: 2px;
 }
 
 .empty-string {

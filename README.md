@@ -1,31 +1,17 @@
+# regexp.cheminfo.org
+
+Interactive pedagogic tool to learn regular expressions — guided
+tutorial, live playground, self-paced exercises with hints and instant
+validation, and a complete cheatsheet.
+
 <p align="center">
-  <a href="https://www.epfl.ch" target="_blank" rel="noreferrer">
-    <img src="./public/epfl-logo.svg" alt="EPFL — École polytechnique fédérale de Lausanne" width="220" />
+  This website is provided by Luc Patiny from
+  <a href="https://www.epfl.ch">
+    <img src="./public/epfl-logo.svg" alt="EPFL" height="32" align="middle" />
   </a>
 </p>
 
-<h1 align="center">regexp.cheminfo.org</h1>
-
-<p align="center">
-  <em>Interactive pedagogic tool to learn regular expressions —
-  guided tutorial, live playground, self-paced exercises with hints
-  and instant validation, and a complete cheatsheet.</em>
-</p>
-
-<p align="center">
-  <a href="https://regexp.cheminfo.org">https://regexp.cheminfo.org</a>
-</p>
-
----
-
-## Provided by EPFL
-
-This site is developed and maintained by the
-[**École polytechnique fédérale de Lausanne (EPFL)**](https://www.epfl.ch)
-as a free, open teaching resource for students and researchers learning
-to use regular expressions. It is part of the
-[cheminfo](https://www.cheminfo.org/) family of scientific tooling
-hosted by EPFL.
+Live site: <https://regexp.cheminfo.org>
 
 ## Replaces the cheminfo "RegExp explorer" visualizer
 
@@ -169,7 +155,4 @@ by release-please based on Conventional Commits.
 
 ## License
 
-[MIT](./LICENSE) © [EPFL — École polytechnique fédérale de Lausanne](https://www.epfl.ch)
-
-The EPFL name, abbreviation, and logo are trademarks of EPFL and are
-used here to identify the institution providing this resource.
+[MIT](./LICENSE)

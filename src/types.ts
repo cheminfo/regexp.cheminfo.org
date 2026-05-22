@@ -90,14 +90,16 @@ interface BaseExercise {
   title: string;
   level: ExerciseLevel;
   description: string;
-  /**
-   * Required flags (e.g. `['g']`).
-   * @default []
-   */
-  requiredFlags?: FlagKey[];
   hints: string[];
   /** Sample pattern shown only when the student reveals the solution. */
   solution: string;
+  /**
+   * Flags paired with `solution`, shown alongside the sample pattern when
+   * the student reveals it. Not enforced by the validator — flag needs
+   * must emerge naturally from the test cases.
+   * @default []
+   */
+  solutionFlags?: FlagKey[];
 }
 
 export interface MatchExercise extends BaseExercise {

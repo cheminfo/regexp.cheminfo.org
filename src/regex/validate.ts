@@ -30,7 +30,6 @@ export interface ValidationResult {
   passed: boolean;
   error: string | null;
   cases: TestCaseResult[];
-  missingFlags: string[];
 }
 
 /**
@@ -41,7 +40,7 @@ export interface ValidationResult {
  * @param flags - The student's flags string.
  * @param replacement - The student's replacement string. Ignored for `match`
  *   exercises; required for `replace` exercises.
- * @returns The validation result with per-case detail and missing flags.
+ * @returns The validation result with per-case detail.
  */
 export function validateExercise(
   exercise: Exercise,
@@ -54,7 +53,6 @@ export function validateExercise(
       passed: false,
       error: 'The regex is empty — write something before validating.',
       cases: emptyCases(exercise),
-      missingFlags: [],
     };
   }
 
@@ -64,25 +62,18 @@ export function validateExercise(
       passed: false,
       error: compiled.error ?? 'Invalid regex',
       cases: emptyCases(exercise),
-      missingFlags: [],
     };
   }
-
-  const required = exercise.requiredFlags ?? [];
-  const missingFlags = required.filter((flag) => !flags.includes(flag));
 
   const cases =
     exercise.kind === 'replace'
       ? validateReplaceCases(exercise, compiled.regex, replacement)
       : validateMatchCases(exercise, compiled.regex);
 
-  const allPassed = cases.every((c) => c.passed) && missingFlags.length === 0;
-
   return {
-    passed: allPassed,
+    passed: cases.every((c) => c.passed),
     error: null,
     cases,
-    missingFlags,
   };
 }
 

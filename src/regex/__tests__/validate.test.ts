@@ -42,7 +42,7 @@ if (CAPTURE_NAME_EXERCISE?.kind !== 'match') {
 
 test('every exercise is solvable by its own sample solution', () => {
   for (const exercise of EXERCISES) {
-    const flags = (exercise.requiredFlags ?? []).join('');
+    const flags = (exercise.solutionFlags ?? []).join('');
     const replacement =
       exercise.kind === 'replace' ? exercise.solutionReplacement : '';
     const result = validateExercise(
@@ -113,7 +113,11 @@ test('expectedGroups: matching the right substring but wrong group fails', () =>
   expect(failing?.reason).toContain('capture group 1');
 });
 
-test('replace exercise: missing required flag g is reported', () => {
+test('replace exercise: missing g flag fails naturally via the test cases', () => {
+  // Without the `g` flag, `String.replace` only replaces the first match,
+  // so the multi-digit test cases produce a wrong output and fail. No
+  // hard-coded "required flag" enforcement is needed — the failure emerges
+  // from the test cases themselves.
   const result = validateExercise(
     REDACT_DIGITS_EXERCISE,
     REDACT_DIGITS_EXERCISE.solution,
@@ -122,5 +126,8 @@ test('replace exercise: missing required flag g is reported', () => {
   );
 
   expect(result.passed).toBe(false);
-  expect(result.missingFlags).toStrictEqual(['g']);
+
+  const failing = result.cases.find((c) => !c.passed);
+
+  expect(failing?.reason).toContain('expected');
 });

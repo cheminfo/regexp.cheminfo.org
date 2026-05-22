@@ -13,6 +13,7 @@ import {
   ProgressBar,
   Tag,
 } from '@blueprintjs/core';
+import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { RegexDiagram } from '../components/RegexDiagram.tsx';
@@ -163,7 +164,6 @@ export function Exercises() {
         passed: false,
         error: null,
         cases: [] as TestCaseResult[],
-        missingFlags: [] as string[],
       };
     }
     return validateExercise(
@@ -176,7 +176,7 @@ export function Exercises() {
 
   useEffect(() => {
     if (validation.passed && state.status !== 'solved') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-event-handler -- intentional: auto-mark as solved when the student types a valid answer, so the menu badge updates without requiring a "Check" click.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: auto-mark as solved when the student types a valid answer, so the menu badge updates without requiring a "Check" click.
       updateState({ status: 'solved' });
     }
   }, [validation.passed, state.status, updateState]);
@@ -337,12 +337,16 @@ export function Exercises() {
                           solved
                         </Tag>
                       )}
-                      {isSolved && exHints > 0 && (
+                      {exHints > 0 && (
                         <Tag
                           minimal
                           intent="warning"
                           icon="lightbulb"
-                          title={`Solved with ${exHints} hint${exHints > 1 ? 's' : ''}`}
+                          title={
+                            isSolved
+                              ? `Solved with ${exHints} hint${exHints > 1 ? 's' : ''}`
+                              : `${exHints} hint${exHints > 1 ? 's' : ''} revealed`
+                          }
                         >
                           {exHints} hint{exHints > 1 ? 's' : ''}
                         </Tag>
@@ -369,12 +373,6 @@ export function Exercises() {
             <p style={{ color: '#5c7080', marginTop: 0 }}>
               {exercise.description}
             </p>
-            {(exercise.requiredFlags ?? []).length > 0 && (
-              <p style={{ color: '#5c7080', marginTop: 4 }}>
-                <strong>Required flags:</strong>{' '}
-                <Code>{(exercise.requiredFlags ?? []).join('')}</Code>
-              </p>
-            )}
 
             <RegexInput
               pattern={state.pattern}
@@ -470,12 +468,6 @@ export function Exercises() {
                 style={{ marginTop: 12 }}
               >
                 Look at the test cases below to see what fails.
-                {validation.missingFlags.length > 0 && (
-                  <div style={{ marginTop: 4 }}>
-                    Missing required flag(s):{' '}
-                    <Code>{validation.missingFlags.join(', ')}</Code>
-                  </div>
-                )}
               </Callout>
             )}
 
@@ -502,7 +494,7 @@ export function Exercises() {
                 style={{ marginTop: 12 }}
               >
                 <Code>
-                  /{exercise.solution}/{(exercise.requiredFlags ?? []).join('')}
+                  /{exercise.solution}/{(exercise.solutionFlags ?? []).join('')}
                 </Code>
                 {isReplace && (
                   <div style={{ marginTop: 6 }}>
@@ -539,15 +531,18 @@ export function Exercises() {
               ))}
             </div>
             {validation.cases.some((c) => !c.passed) && !compiled.error && (
-              <div style={{ marginTop: 10, fontSize: 13, color: '#5c7080' }}>
+              <div style={{ marginTop: 10 }}>
                 <H5>Failures detail</H5>
-                <ul style={{ marginTop: 4 }}>
+                <div className="failure-list">
                   {validation.cases
                     .filter((c) => !c.passed)
                     .map((failure) => (
-                      <li key={testCaseKey(failure)}>{failure.reason}</li>
+                      <FailureDetail
+                        key={testCaseKey(failure)}
+                        result={failure}
+                      />
                     ))}
-                </ul>
+                </div>
               </div>
             )}
           </Card>
@@ -578,11 +573,12 @@ function TestCaseRow({ result, hasCompileError }: TestCaseRowProps) {
     return (
       <div className="test-case">
         <Icon icon={icon} intent={intent} />
-        <span className="tc-text">
-          {displayText(result.testCase.text)}
-          {' → '}
-          {displayText(result.testCase.expected)}
-        </span>
+        <div className="tc-grid">
+          <span className="tc-label">Input</span>
+          <VisibleText text={result.testCase.text} />
+          <span className="tc-label">Expected</span>
+          <VisibleText text={result.testCase.expected} />
+        </div>
         <Tag minimal intent={intent}>
           replace
         </Tag>
@@ -593,7 +589,10 @@ function TestCaseRow({ result, hasCompileError }: TestCaseRowProps) {
   return (
     <div className="test-case">
       <Icon icon={icon} intent={intent} />
-      <span className="tc-text">{displayText(result.testCase.text)}</span>
+      <div className="tc-grid tc-grid-single">
+        <span className="tc-label">Input</span>
+        <VisibleText text={result.testCase.text} />
+      </div>
       <Tag minimal intent={intent}>
         {result.testCase.shouldMatch
           ? result.testCase.expected
@@ -605,16 +604,154 @@ function TestCaseRow({ result, hasCompileError }: TestCaseRowProps) {
   );
 }
 
+function FailureDetail({ result }: { result: TestCaseResult }) {
+  if (result.kind === 'replace') {
+    return (
+      <div className="failure-detail">
+        <span className="fd-label">Input</span>
+        <span className="fd-full">
+          <VisibleText text={result.testCase.text} />
+        </span>
+        <span className="fd-label">Expected</span>
+        <VisibleText text={result.testCase.expected} />
+        <span className="fd-label">Got</span>
+        {result.actual === null ? (
+          <span className="fd-error">{result.reason}</span>
+        ) : (
+          <VisibleText text={result.actual} />
+        )}
+      </div>
+    );
+  }
+
+  const { testCase, actual, reason } = result;
+
+  if (testCase.shouldMatch) {
+    if (actual === null) {
+      return (
+        <div className="failure-detail">
+          <span className="fd-label">Input</span>
+          <span className="fd-full">
+            <VisibleText text={testCase.text} />
+          </span>
+          <span className="fd-label">Expected</span>
+          <span className="fd-error fd-full">
+            a match
+            {testCase.expected ? (
+              <>
+                {' '}
+                of `<code>{testCase.expected}</code>`
+              </>
+            ) : null}{' '}
+            — found none
+          </span>
+        </div>
+      );
+    }
+    if (testCase.expected !== undefined && actual !== testCase.expected) {
+      return (
+        <div className="failure-detail">
+          <span className="fd-label">Input</span>
+          <span className="fd-full">
+            <VisibleText text={testCase.text} />
+          </span>
+          <span className="fd-label">Expected match</span>
+          <VisibleText text={testCase.expected} />
+          <span className="fd-label">Got match</span>
+          <VisibleText text={actual} />
+        </div>
+      );
+    }
+    // Capture-group mismatch or other reason — fall back to reason text.
+    return (
+      <div className="failure-detail">
+        <span className="fd-label">Input</span>
+        <span className="fd-full">
+          <VisibleText text={testCase.text} />
+        </span>
+        <span className="fd-label">Problem</span>
+        <span className="fd-error fd-full">{reason}</span>
+      </div>
+    );
+  }
+
+  // shouldMatch: false but a match was found
+  return (
+    <div className="failure-detail">
+      <span className="fd-label">Input</span>
+      <span className="fd-full">
+        <VisibleText text={testCase.text} />
+      </span>
+      <span className="fd-label">Problem</span>
+      <span className="fd-error fd-full">
+        should not match, but matched <VisibleText text={actual ?? ''} inline />
+      </span>
+    </div>
+  );
+}
+
+interface VisibleTextProps {
+  text: string;
+  inline?: boolean;
+}
+
+function VisibleText({ text, inline = false }: VisibleTextProps) {
+  if (text === '') {
+    return <span className="visible-text empty-string">(empty string)</span>;
+  }
+  return (
+    <span className={`visible-text${inline ? ' is-inline' : ''}`}>
+      {renderVisibleParts(text)}
+    </span>
+  );
+}
+
+function renderVisibleParts(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let buffer = '';
+  let key = 0;
+  const flush = () => {
+    if (buffer) {
+      parts.push(<span key={`t${key++}`}>{buffer}</span>);
+      buffer = '';
+    }
+  };
+  for (const ch of text) {
+    if (ch === ' ') {
+      flush();
+      parts.push(
+        <span key={`s${key++}`} className="ws ws-space">
+          ·
+        </span>,
+      );
+    } else if (ch === '\t') {
+      flush();
+      parts.push(
+        <span key={`t${key++}`} className="ws ws-tab">
+          →
+        </span>,
+      );
+    } else if (ch === '\n') {
+      flush();
+      parts.push(
+        <span key={`n${key++}`} className="ws ws-nl">
+          ↵
+        </span>,
+        '\n',
+      );
+    } else {
+      buffer += ch;
+    }
+  }
+  flush();
+  return parts;
+}
+
 function testCaseKey(result: TestCaseResult): string {
   if (result.kind === 'replace') {
     return `replace::${result.testCase.text}::${result.testCase.expected}`;
   }
   return `match::${result.testCase.text}::${String(result.testCase.shouldMatch)}`;
-}
-
-function displayText(text: string): string {
-  if (text === '') return '(empty string)';
-  return text;
 }
 
 function displayReplacement(replacement: string): string {

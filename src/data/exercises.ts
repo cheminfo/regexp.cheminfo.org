@@ -27,7 +27,7 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Match the word "hello" regardless of its capitalization. Hint: there is a flag for this.',
-    requiredFlags: ['i'],
+    solutionFlags: ['i'],
     testCases: [
       { text: 'hello world', shouldMatch: true, expected: 'hello' },
       { text: 'HELLO!', shouldMatch: true, expected: 'HELLO' },
@@ -226,8 +226,7 @@ export const EXERCISES: Exercise[] = [
     title: 'Find a duplicate word',
     level: 'advanced',
     description:
-      'Match any word that is immediately repeated — for instance "the the". Use a backreference so you do not have to hardcode the word.',
-    requiredFlags: ['i'],
+      'Match any word that is immediately repeated — for instance "the the" or "The THE". Use a backreference so you do not have to hardcode the word, and make the match case-insensitive so different casings still count as a repetition.',
     testCases: [
       {
         text: 'this is the the test',
@@ -242,13 +241,21 @@ export const EXERCISES: Exercise[] = [
         expected: 'I I',
         expectedGroups: ['I'],
       },
+      {
+        text: 'The THE building',
+        shouldMatch: true,
+        expected: 'The THE',
+        expectedGroups: ['The'],
+      },
     ],
     hints: [
       String.raw`Use a capturing group for a word: (\w+).`,
       String.raw`Then refer to it again with \1 after a space.`,
+      'A backreference is case-sensitive by default — add a flag to ignore case.',
       String.raw`Try \b(\w+) \1\b with the i flag.`,
     ],
     solution: String.raw`\b(\w+) \1\b`,
+    solutionFlags: ['i'],
   },
   {
     id: 'replace-redact-digits',
@@ -257,7 +264,7 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Replace every digit in the text with a "#" character. Be sure to replace all of them, not just the first one.',
-    requiredFlags: ['g'],
+    solutionFlags: ['g'],
     testCases: [
       { text: 'Room 42, floor 7', expected: 'Room ##, floor #' },
       { text: 'no digits here', expected: 'no digits here' },
@@ -278,7 +285,7 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Turn any run of one-or-more whitespace characters into a single space. Tabs and multiple spaces should all become exactly one space.',
-    requiredFlags: ['g'],
+    solutionFlags: ['g'],
     testCases: [
       { text: 'hello   world', expected: 'hello world' },
       { text: 'a\t\tb  c', expected: 'a b c' },
@@ -318,7 +325,7 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Convert ISO dates (YYYY-MM-DD) into European-style DD/MM/YYYY using three capturing groups.',
-    requiredFlags: ['g'],
+    solutionFlags: ['g'],
     testCases: [
       { text: '2024-01-31', expected: '31/01/2024' },
       {
@@ -342,7 +349,7 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Remove any trailing spaces or tabs at the end of each line, without touching blank lines that are already empty.',
-    requiredFlags: ['g', 'm'],
+    solutionFlags: ['g', 'm'],
     testCases: [
       { text: 'hello   \nworld\t', expected: 'hello\nworld' },
       { text: 'clean\nlines', expected: 'clean\nlines' },
@@ -363,13 +370,21 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Surround every email address in the text with angle brackets. Use $& in the replacement to refer to the whole match.',
-    requiredFlags: ['g'],
+    solutionFlags: ['g'],
     testCases: [
       {
         text: 'write to foo@bar.com or baz@qux.org',
         expected: 'write to <foo@bar.com> or <baz@qux.org>',
       },
       { text: 'no email here', expected: 'no email here' },
+      {
+        text: 'reach support-team@my-site.org for help',
+        expected: 'reach <support-team@my-site.org> for help',
+      },
+      {
+        text: 'visit example.com or test.org — no emails',
+        expected: 'visit example.com or test.org — no emails',
+      },
     ],
     hints: [
       'Reuse the email pattern from the matching exercise.',
@@ -386,12 +401,15 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Same as the date-reformat exercise, but use named capturing groups and refer to them in the replacement with $<name> syntax.',
-    requiredFlags: ['g'],
     testCases: [
       { text: '2024-01-31', expected: '31/01/2024' },
       {
         text: 'meet on 2025-06-15 please',
         expected: 'meet on 15/06/2025 please',
+      },
+      {
+        text: 'sprint 2025-06-15 to 2025-06-22',
+        expected: 'sprint 15/06/2025 to 22/06/2025',
       },
     ],
     hints: [
@@ -400,6 +418,7 @@ export const EXERCISES: Exercise[] = [
       String.raw`Try (?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2}) with $<day>/$<month>/$<year>.`,
     ],
     solution: String.raw`(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})`,
+    solutionFlags: ['g'],
     solutionReplacement: '$<day>/$<month>/$<year>',
   },
   {
@@ -409,7 +428,7 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Remove every HTML tag, keeping only the surrounding text. Match the smallest possible tag — beware of greedy quantifiers across multiple tags.',
-    requiredFlags: ['g'],
+    solutionFlags: ['g'],
     testCases: [
       {
         text: '<p>Hello <b>world</b></p>',

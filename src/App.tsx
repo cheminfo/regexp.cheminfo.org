@@ -1,6 +1,7 @@
 import { Icon, Tab, Tabs } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
 
+import { About } from './pages/About.tsx';
 import { Cheatsheet } from './pages/Cheatsheet.tsx';
 import { Exercises } from './pages/Exercises.tsx';
 import { Glossary } from './pages/Glossary.tsx';
@@ -12,7 +13,8 @@ type Route =
   | 'playground'
   | 'exercises'
   | 'cheatsheet'
-  | 'glossary';
+  | 'glossary'
+  | 'about';
 
 const ROUTES: Array<{ id: Route; label: string }> = [
   { id: 'tutorial', label: 'Tutorial' },
@@ -20,6 +22,7 @@ const ROUTES: Array<{ id: Route; label: string }> = [
   { id: 'exercises', label: 'Exercises' },
   { id: 'cheatsheet', label: 'Cheatsheet' },
   { id: 'glossary', label: 'Glossary' },
+  { id: 'about', label: 'About' },
 ];
 
 const VALID_ROUTES = new Set<string>(ROUTES.map((r) => r.id));
@@ -156,58 +159,8 @@ export function App() {
         {route === 'exercises' && <Exercises />}
         {route === 'cheatsheet' && <Cheatsheet />}
         {route === 'glossary' && <Glossary />}
+        {route === 'about' && <About />}
       </div>
-
-      <footer
-        className="no-print"
-        style={{
-          marginTop: 32,
-          padding: '20px 0 12px',
-          borderTop: '1px solid #d3d8de',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 8,
-          color: '#5c7080',
-          fontSize: 12,
-        }}
-      >
-        <a
-          href="https://www.epfl.ch"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="École polytechnique fédérale de Lausanne"
-        >
-          <img
-            src="/epfl-logo.svg"
-            alt="EPFL — École polytechnique fédérale de Lausanne"
-            width={140}
-            height={40}
-            style={{ display: 'block' }}
-          />
-        </a>
-        <div>
-          Provided by the{' '}
-          <a
-            href="https://www.epfl.ch"
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: '#5c7080' }}
-          >
-            École polytechnique fédérale de Lausanne (EPFL)
-          </a>{' '}
-          · part of the{' '}
-          <a
-            href="https://www.cheminfo.org"
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: '#5c7080' }}
-          >
-            cheminfo
-          </a>{' '}
-          family.
-        </div>
-      </footer>
     </div>
   );
 }

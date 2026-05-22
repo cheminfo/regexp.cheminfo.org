@@ -1,4 +1,5 @@
 import { Card, H4, Tooltip } from '@blueprintjs/core';
+import type { ReactNode } from 'react';
 
 import type { ReferenceItem } from '../data/reference.ts';
 import { REFERENCE_SECTIONS } from '../data/reference.ts';
@@ -39,38 +40,47 @@ function ReferenceRow({ item }: { item: ReferenceItem }) {
   const hasRichTooltip = Boolean(item.detail && item.example && item.name);
   const syntaxCell = <code>{item.syntax}</code>;
 
+  if (!hasRichTooltip) {
+    return (
+      <tr>
+        <td>{syntaxCell}</td>
+        <td>{item.description}</td>
+      </tr>
+    );
+  }
+
+  const tooltipContent = (
+    <SyntaxTooltip
+      content={{
+        syntax: item.syntax,
+        name: item.name ?? item.syntax,
+        tag: item.tag,
+        summary: item.description,
+        detail: item.detail ?? '',
+        example: item.example ?? { pattern: '', input: '', note: '' },
+      }}
+    />
+  );
+
+  const wrap = (child: ReactNode) => (
+    <Tooltip
+      content={tooltipContent}
+      placement="right"
+      hoverOpenDelay={150}
+      popoverClassName="syntax-tooltip-popover"
+    >
+      {child}
+    </Tooltip>
+  );
+
   return (
-    <tr className={hasRichTooltip ? 'reference-row-interactive' : undefined}>
+    <tr className="reference-row-interactive">
+      <td>{wrap(<span className="reference-syntax">{syntaxCell}</span>)}</td>
       <td>
-        {hasRichTooltip ? (
-          <Tooltip
-            content={
-              <SyntaxTooltip
-                content={{
-                  syntax: item.syntax,
-                  name: item.name ?? item.syntax,
-                  tag: item.tag,
-                  summary: item.description,
-                  detail: item.detail ?? '',
-                  example: item.example ?? {
-                    pattern: '',
-                    input: '',
-                    note: '',
-                  },
-                }}
-              />
-            }
-            placement="right"
-            hoverOpenDelay={150}
-            popoverClassName="syntax-tooltip-popover"
-          >
-            <span className="reference-syntax">{syntaxCell}</span>
-          </Tooltip>
-        ) : (
-          syntaxCell
+        {wrap(
+          <span className="reference-description">{item.description}</span>,
         )}
       </td>
-      <td>{item.description}</td>
     </tr>
   );
 }
