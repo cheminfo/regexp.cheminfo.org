@@ -124,7 +124,7 @@ body,
   margin-top: 10px;
 }
 
-.flag-tooltip-popover .bp6-popover-content {
+.syntax-tooltip-popover .bp6-popover-content {
   padding: 0;
   background: #1f2937;
   color: #f3f4f6;
@@ -132,11 +132,11 @@ body,
   max-width: 380px;
 }
 
-.flag-tooltip-popover .bp6-popover-arrow-fill {
+.syntax-tooltip-popover .bp6-popover-arrow-fill {
   fill: #1f2937;
 }
 
-.flag-tooltip {
+.syntax-tooltip {
   padding: 10px 12px;
   font-size: 12px;
   line-height: 1.45;
@@ -145,7 +145,7 @@ body,
   gap: 8px;
 }
 
-.flag-tooltip-header {
+.syntax-tooltip-header {
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -154,7 +154,7 @@ body,
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.flag-tooltip-key {
+.syntax-tooltip-key {
   font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 600;
@@ -164,27 +164,27 @@ body,
   border-radius: 4px;
 }
 
-.flag-tooltip-name {
+.syntax-tooltip-name {
   font-weight: 600;
   font-size: 13px;
 }
 
-.flag-tooltip-property {
+.syntax-tooltip-tag {
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: 11px;
   opacity: 0.75;
 }
 
-.flag-tooltip-summary {
+.syntax-tooltip-summary {
   font-weight: 500;
 }
 
-.flag-tooltip-detail {
+.syntax-tooltip-detail {
   opacity: 0.9;
 }
 
-.flag-tooltip-example {
+.syntax-tooltip-example {
   background: rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   padding: 8px 10px;
@@ -195,13 +195,13 @@ body,
   font-size: 11.5px;
 }
 
-.flag-tooltip-example-row {
+.syntax-tooltip-example-row {
   display: flex;
   gap: 8px;
   align-items: baseline;
 }
 
-.flag-tooltip-example-label {
+.syntax-tooltip-example-label {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 10px;
@@ -211,13 +211,13 @@ body,
   min-width: 52px;
 }
 
-.flag-tooltip-example-row code {
+.syntax-tooltip-example-row code {
   color: #fde68a;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.flag-tooltip-example-note {
+.syntax-tooltip-example-note {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 11.5px;
@@ -291,6 +291,18 @@ body,
   border-bottom: none;
 }
 
+.reference-row-interactive {
+  cursor: help;
+}
+
+.reference-row-interactive:hover td:first-child {
+  background: #fff7e0;
+}
+
+.reference-row-interactive .reference-syntax {
+  display: inline-block;
+}
+
 .exercise-list {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
@@ -319,6 +331,20 @@ body,
   width: 100%;
   padding: 8px 10px !important;
   min-height: auto !important;
+}
+
+.exercise-menu .bp6-button.is-solved:not(.bp6-active) {
+  background: #e8f7ee !important;
+  border-color: #62b97f !important;
+}
+
+.exercise-menu .bp6-button.is-solved:not(.bp6-active) .ex-title {
+  color: #29794a;
+}
+
+.exercise-menu .bp6-button.is-attempted:not(.bp6-active) {
+  background: #fff7e6 !important;
+  border-color: #e0a700 !important;
 }
 
 .exercise-menu .ex-meta {
@@ -639,6 +665,77 @@ body,
   justify-content: flex-end;
 }
 
+.glossary-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+.glossary-search {
+  flex: 0 1 280px;
+  max-width: 280px;
+}
+
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.glossary-card {
+  border: 1px solid #e1e8ed;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.glossary-card__title {
+  margin: 0 0 4px 0;
+  color: #0e5a91;
+}
+
+.glossary-card__summary {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #182026;
+}
+
+.glossary-card__examples {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #394b59;
+}
+
+.glossary-card__examples li + li {
+  margin-top: 4px;
+}
+
+.glossary-card__examples code {
+  font-family: var(--font-mono);
+  background: #ffffff;
+  border: 1px solid #e1e8ed;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.glossary-card__note {
+  color: #5c7080;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.glossary-empty {
+  font-size: 13px;
+  color: #5c7080;
+  font-style: italic;
+  padding: 12px 0;
+}
+
 @media print {
   @page {
     size: A4;
@@ -694,6 +791,29 @@ body,
   }
 
   .cheatsheet-page .bp6-heading {
+    color: #000 !important;
+  }
+
+  .glossary-page .bp6-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .glossary-grid {
+    display: block !important;
+    column-count: 2;
+    column-gap: 12mm;
+  }
+
+  .glossary-card {
+    background: transparent;
+    border: none;
+    padding: 0 0 4mm 0;
+  }
+
+  .glossary-card__title,
+  .glossary-page .bp6-heading {
     color: #000 !important;
   }
 }

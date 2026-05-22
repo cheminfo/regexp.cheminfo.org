@@ -28,31 +28,44 @@ type RegexperJob = Promise<{ warnings: string[] }> & { cancel: () => void };
  */
 export function RegexDiagram({ pattern, flags, error }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const pendingRenderRef = useRef<Promise<void>>(Promise.resolve());
   const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container || pattern === '' || error) return;
 
-    container.replaceChildren();
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change -- clear stale async error before kicking off a new render
-    setRenderError(null);
-
-    const job = renderRegex(
-      `/${pattern}/${flags}`,
-      container,
-    ) as unknown as RegexperJob;
     let cancelled = false;
-    job.catch((error_: unknown) => {
+    let job: RegexperJob | null = null;
+
+    // Chain through any in-flight cancelled render so its DOM writes finish
+    // before we clear the container and start a new one. Without this, in
+    // React StrictMode the first run's `render()` resolves *after* cancel
+    // and stamps stale `<g>` nodes into the SVG the second run just created.
+    const previous = pendingRenderRef.current;
+    const current = previous.then(async () => {
       if (cancelled) return;
-      const message = error_ instanceof Error ? error_.message : String(error_);
-      if (message === 'Render cancelled') return;
-      setRenderError(message);
+      container.replaceChildren();
+      setRenderError(null);
+      job = renderRegex(
+        `/${pattern}/${flags}`,
+        container,
+      ) as unknown as RegexperJob;
+      try {
+        await job;
+      } catch (error_: unknown) {
+        if (cancelled) return;
+        const message =
+          error_ instanceof Error ? error_.message : String(error_);
+        if (message === 'Render cancelled') return;
+        setRenderError(message);
+      }
     });
+    pendingRenderRef.current = current;
 
     return () => {
       cancelled = true;
-      job.cancel();
+      job?.cancel();
     };
   }, [pattern, flags, error]);
 

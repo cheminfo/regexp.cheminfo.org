@@ -24,6 +24,36 @@ import { validateExercise } from '../regex/validate.ts';
 import type { Exercise, ExerciseState } from '../types.ts';
 
 const STORAGE_KEY = 'regexp-cheminfo:exercise-state:v1';
+const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
+
+function readExerciseIdFromHash(): string | null {
+  const segments = globalThis.location.hash.replace(/^#\/?/, '').split('/');
+  if (segments[0] !== 'exercises') return null;
+  const id = segments[1];
+  if (!id) return null;
+  const decoded = decodeURIComponent(id);
+  return EXERCISES.some((ex) => ex.id === decoded) ? decoded : null;
+}
+
+function readLastExerciseId(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = window.localStorage.getItem(LAST_EXERCISE_KEY);
+    if (!stored) return null;
+    return EXERCISES.some((ex) => ex.id === stored) ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeLastExerciseId(id: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(LAST_EXERCISE_KEY, id);
+  } catch {
+    // Ignore quota errors — last-active id is best-effort.
+  }
+}
 
 type StateMap = Record<string, ExerciseState>;
 
@@ -83,9 +113,15 @@ const FIRST_EXERCISE: Exercise | undefined = EXERCISES[0];
  * @returns The exercises page component.
  */
 export function Exercises() {
-  const [activeId, setActiveId] = useState<string>(
-    () => FIRST_EXERCISE?.id ?? '',
-  );
+  const [activeId, setActiveIdState] = useState<string>(() => {
+    const id =
+      readExerciseIdFromHash() ??
+      readLastExerciseId() ??
+      FIRST_EXERCISE?.id ??
+      '';
+    if (id) writeLastExerciseId(id);
+    return id;
+  });
   const [statesByExercise, setStatesByExercise] = useState<StateMap>(loadState);
   const [clearAlertOpen, setClearAlertOpen] = useState(false);
 
@@ -96,6 +132,11 @@ export function Exercises() {
   const exercise = EXERCISES.find((ex) => ex.id === activeId) ?? FIRST_EXERCISE;
   const exerciseId = exercise?.id ?? '';
   const state = statesByExercise[exerciseId] ?? defaultState();
+
+  const selectExercise = useCallback((id: string) => {
+    setActiveIdState(id);
+    writeLastExerciseId(id);
+  }, []);
 
   const updateState = useCallback(
     (patch: Partial<ExerciseState>) => {
@@ -132,6 +173,13 @@ export function Exercises() {
       state.replacement,
     );
   }, [exercise, state.pattern, state.flags, state.replacement]);
+
+  useEffect(() => {
+    if (validation.passed && state.status !== 'solved') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-event-handler -- intentional: auto-mark as solved when the student types a valid answer, so the menu badge updates without requiring a "Check" click.
+      updateState({ status: 'solved' });
+    }
+  }, [validation.passed, state.status, updateState]);
 
   const solvedCount = EXERCISES.filter(
     (ex) => statesByExercise[ex.id]?.status === 'solved',
@@ -239,29 +287,37 @@ export function Exercises() {
       <div className="exercise-list">
         <div className="exercise-menu" role="navigation" aria-label="Exercises">
           {EXERCISES.map((ex) => {
-            const exState = statesByExercise[ex.id]?.status ?? 'idle';
+            const exStored = statesByExercise[ex.id];
+            const exState = exStored?.status ?? 'idle';
+            const exHints = exStored?.hintsRevealed ?? 0;
             const isActive = ex.id === exercise.id;
-            const icon =
-              exState === 'solved'
-                ? 'tick'
-                : exState === 'attempted'
-                  ? 'warning-sign'
-                  : 'circle';
-            const intent =
-              exState === 'solved'
-                ? 'success'
-                : exState === 'attempted'
-                  ? 'warning'
-                  : 'none';
+            const isSolved = exState === 'solved';
+            const isAttempted = exState === 'attempted';
+            const icon = isSolved
+              ? 'tick-circle'
+              : isAttempted
+                ? 'warning-sign'
+                : 'circle';
+            const intent = isSolved
+              ? 'success'
+              : isAttempted
+                ? 'warning'
+                : 'none';
+            const statusClass = isSolved
+              ? 'is-solved'
+              : isAttempted
+                ? 'is-attempted'
+                : '';
             return (
               <Button
                 key={ex.id}
                 active={isActive}
                 variant={isActive ? 'solid' : 'outlined'}
                 onClick={() => {
-                  setActiveId(ex.id);
+                  selectExercise(ex.id);
                 }}
                 alignText="left"
+                className={statusClass}
               >
                 <div className="ex-meta">
                   <Icon icon={icon} intent={intent} />
@@ -274,6 +330,21 @@ export function Exercises() {
                       {ex.kind === 'replace' && (
                         <Tag minimal intent="primary">
                           replace
+                        </Tag>
+                      )}
+                      {isSolved && (
+                        <Tag minimal intent="success" icon="tick">
+                          solved
+                        </Tag>
+                      )}
+                      {isSolved && exHints > 0 && (
+                        <Tag
+                          minimal
+                          intent="warning"
+                          icon="lightbulb"
+                          title={`Solved with ${exHints} hint${exHints > 1 ? 's' : ''}`}
+                        >
+                          {exHints} hint{exHints > 1 ? 's' : ''}
                         </Tag>
                       )}
                     </div>
@@ -381,6 +452,14 @@ export function Exercises() {
                 style={{ marginTop: 12 }}
               >
                 All test cases pass. Move on to the next exercise.
+                {state.hintsRevealed > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    <Tag minimal intent="warning" icon="lightbulb">
+                      Solved with {state.hintsRevealed} hint
+                      {state.hintsRevealed > 1 ? 's' : ''}
+                    </Tag>
+                  </div>
+                )}
               </Callout>
             )}
             {state.status === 'attempted' && !validation.passed && (

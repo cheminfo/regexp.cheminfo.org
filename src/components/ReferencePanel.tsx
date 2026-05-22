@@ -1,9 +1,14 @@
-import { Card, H4 } from '@blueprintjs/core';
+import { Card, H4, Tooltip } from '@blueprintjs/core';
 
+import type { ReferenceItem } from '../data/reference.ts';
 import { REFERENCE_SECTIONS } from '../data/reference.ts';
+
+import { SyntaxTooltip } from './SyntaxTooltip.tsx';
 
 /**
  * Render the regex cheatsheet — a grid of categorised reference cards.
+ * Every item that carries `detail` + `example` shows a rich dark tooltip
+ * on hover, using the same component as the flag toggle buttons.
  * @returns The cheatsheet card.
  */
 export function ReferencePanel() {
@@ -19,12 +24,7 @@ export function ReferencePanel() {
             <table className="reference-table">
               <tbody>
                 {section.items.map((item) => (
-                  <tr key={item.syntax}>
-                    <td>
-                      <code>{item.syntax}</code>
-                    </td>
-                    <td>{item.description}</td>
-                  </tr>
+                  <ReferenceRow key={item.syntax} item={item} />
                 ))}
               </tbody>
             </table>
@@ -32,5 +32,45 @@ export function ReferencePanel() {
         ))}
       </div>
     </Card>
+  );
+}
+
+function ReferenceRow({ item }: { item: ReferenceItem }) {
+  const hasRichTooltip = Boolean(item.detail && item.example && item.name);
+  const syntaxCell = <code>{item.syntax}</code>;
+
+  return (
+    <tr className={hasRichTooltip ? 'reference-row-interactive' : undefined}>
+      <td>
+        {hasRichTooltip ? (
+          <Tooltip
+            content={
+              <SyntaxTooltip
+                content={{
+                  syntax: item.syntax,
+                  name: item.name ?? item.syntax,
+                  tag: item.tag,
+                  summary: item.description,
+                  detail: item.detail ?? '',
+                  example: item.example ?? {
+                    pattern: '',
+                    input: '',
+                    note: '',
+                  },
+                }}
+              />
+            }
+            placement="right"
+            hoverOpenDelay={150}
+            popoverClassName="syntax-tooltip-popover"
+          >
+            <span className="reference-syntax">{syntaxCell}</span>
+          </Tooltip>
+        ) : (
+          syntaxCell
+        )}
+      </td>
+      <td>{item.description}</td>
+    </tr>
   );
 }

@@ -178,17 +178,19 @@ export const EXERCISES: Exercise[] = [
     title: 'Capture first name from "Hello, NAME!"',
     level: 'intermediate',
     description:
-      'Use a capturing group to capture only the name in greetings like "Hello, Alice!". The full match can be the whole greeting, but you must capture just the name in group 1.',
+      'Use a capturing group to capture only the name in greetings like "Hello, Alice!". The full match must be the whole greeting (so a plain "Hi Alice!" is rejected), and group 1 must contain just the name.',
     testCases: [
       {
         text: 'Hello, Alice!',
         shouldMatch: true,
         expected: 'Hello, Alice!',
+        expectedGroups: ['Alice'],
       },
       {
         text: 'Hello, Bob!',
         shouldMatch: true,
         expected: 'Hello, Bob!',
+        expectedGroups: ['Bob'],
       },
       { text: 'Hi Alice!', shouldMatch: false },
     ],
@@ -227,9 +229,19 @@ export const EXERCISES: Exercise[] = [
       'Match any word that is immediately repeated — for instance "the the". Use a backreference so you do not have to hardcode the word.',
     requiredFlags: ['i'],
     testCases: [
-      { text: 'this is the the test', shouldMatch: true, expected: 'the the' },
+      {
+        text: 'this is the the test',
+        shouldMatch: true,
+        expected: 'the the',
+        expectedGroups: ['the'],
+      },
       { text: 'all good here', shouldMatch: false },
-      { text: 'I I think so', shouldMatch: true, expected: 'I I' },
+      {
+        text: 'I I think so',
+        shouldMatch: true,
+        expected: 'I I',
+        expectedGroups: ['I'],
+      },
     ],
     hints: [
       String.raw`Use a capturing group for a word: (\w+).`,

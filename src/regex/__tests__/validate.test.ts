@@ -33,6 +33,13 @@ if (REDACT_DIGITS_EXERCISE?.kind !== 'replace') {
   );
 }
 
+const CAPTURE_NAME_EXERCISE = EXERCISES.find(
+  (ex) => ex.id === 'capture-group-name',
+);
+if (CAPTURE_NAME_EXERCISE?.kind !== 'match') {
+  throw new Error('Expected "capture-group-name" match exercise to be defined');
+}
+
 test('every exercise is solvable by its own sample solution', () => {
   for (const exercise of EXERCISES) {
     const flags = (exercise.requiredFlags ?? []).join('');
@@ -86,6 +93,24 @@ test('replace exercise: wrong replacement string fails', () => {
   expect(result.passed).toBe(false);
   expect(result.cases.every((c) => c.kind === 'replace')).toBe(true);
   expect(result.cases.some((c) => !c.passed)).toBe(true);
+});
+
+test('expectedGroups: matching the right substring but wrong group fails', () => {
+  // `Hello, \w+(!)` makes the full match equal to "Hello, Alice!" but
+  // captures "!" in group 1 instead of the name. Without `expectedGroups`
+  // this would pass; with it, the test must fail with a group-mismatch
+  // reason.
+  const result = validateExercise(
+    CAPTURE_NAME_EXERCISE,
+    String.raw`Hello, \w+(!)`,
+    '',
+  );
+
+  expect(result.passed).toBe(false);
+
+  const failing = result.cases.find((c) => !c.passed);
+
+  expect(failing?.reason).toContain('capture group 1');
 });
 
 test('replace exercise: missing required flag g is reported', () => {

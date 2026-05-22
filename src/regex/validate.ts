@@ -147,6 +147,21 @@ function validateMatchCases(
           actual: match[0],
         };
       }
+      if (testCase.expectedGroups !== undefined) {
+        for (let i = 0; i < testCase.expectedGroups.length; i++) {
+          const expected = testCase.expectedGroups[i];
+          const actual = match[i + 1];
+          if (actual !== expected) {
+            return {
+              kind: 'match',
+              testCase,
+              passed: false,
+              reason: `capture group ${i + 1} was ${formatGroup(actual)}, expected ${formatGroup(expected)}`,
+              actual: match[0],
+            };
+          }
+        }
+      }
       return {
         kind: 'match',
         testCase,
@@ -229,4 +244,8 @@ function cloneRegex(source: RegExp): RegExp | null {
   } catch {
     return null;
   }
+}
+
+function formatGroup(value: string | undefined): string {
+  return value === undefined ? '(not captured)' : `"${value}"`;
 }

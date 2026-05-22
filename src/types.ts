@@ -68,6 +68,14 @@ export interface MatchTestCase {
    * @default undefined
    */
   expected?: string;
+  /**
+   * Optional expected values for numbered capture groups, in declaration
+   * order. Entry at index `i` pins the value of `match[i + 1]`; an entry of
+   * `undefined` requires that group not to participate in the match. Only
+   * checked when `shouldMatch` is `true`.
+   * @default undefined
+   */
+  expectedGroups?: Array<string | undefined>;
 }
 
 export interface ReplaceTestCase {
