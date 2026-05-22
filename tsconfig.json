@@ -1,0 +1,11 @@
+{
+  "extends": "@zakodium/tsconfig",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["src", "vite*.ts", "vitest*.ts"]
+}
