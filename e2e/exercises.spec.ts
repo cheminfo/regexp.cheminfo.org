@@ -72,18 +72,96 @@ test('an invalid attempt is reported and not stored as solved', async ({
   await expect(page.getByText(/0 \/ \d+ exercises solved/)).toBeVisible();
 });
 
-test('the hint button reveals hints one at a time', async ({ page }) => {
-  // Hints are revealed by clicking the button; counter is part of the label.
+test('revealed hints show the actual hint text, one click at a time', async ({
+  page,
+}) => {
+  // Exercise 1 ("literal-hello") has two hints in src/data/exercises.ts:
+  //   1. "A regex made of plain letters matches those exact letters."
+  //   2. "The regex /hello/ matches the substring \"hello\"."
+  const reveal = page.getByRole('button', { name: /Reveal hint/ });
+
+  // No hint visible yet.
+  await expect(page.getByText(/plain letters/i)).toHaveCount(0);
+
+  await reveal.click();
   await expect(
-    page.getByRole('button', { name: /Reveal hint \(0\/2\)/ }),
+    page.getByText(
+      'A regex made of plain letters matches those exact letters.',
+    ),
+  ).toBeVisible();
+  // Second hint is NOT yet visible.
+  await expect(page.getByText(/matches the substring/i)).toHaveCount(0);
+
+  await reveal.click();
+  await expect(
+    page.getByText(/The regex .*hello.* matches the substring/i),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: /Reveal hint/ }).click();
-
+  // Both hints are revealed → the button is disabled at 2/2.
   await expect(
-    page.getByRole('button', { name: /Reveal hint \(1\/2\)/ }),
+    page.getByRole('button', { name: /Reveal hint \(2\/2\)/ }),
+  ).toBeDisabled();
+});
+
+test('the test-case list updates live as the student types', async ({
+  page,
+}) => {
+  const pattern = page.getByLabel('Regular expression pattern');
+
+  // Type a partial answer. "hel" matches "hello world" but returns "hel"
+  // (not the expected "hello"), so the Failures-detail block renders.
+  await pattern.fill('hel');
+
+  const failures = page.locator('.failure-list');
+  await expect(failures).toBeVisible();
+  await expect(failures.getByText('Expected match').first()).toBeVisible();
+  await expect(failures.getByText('Got match').first()).toBeVisible();
+
+  // Completing the regex flips the exercise to solved and clears the
+  // failure list.
+  await pattern.fill('hello');
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
+  await expect(page.locator('.failure-list')).toHaveCount(0);
+});
+
+test('navigating to a different exercise loads its own persisted state', async ({
+  page,
+}) => {
+  // Solve exercise 1 ("literal-hello") with pattern "hello".
+  await page.getByLabel('Regular expression pattern').fill('hello');
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
+
+  // Jump to exercise 3 ("digit") — its input must be empty (fresh state).
+  await page.getByRole('button', { name: /^Find any digit/i }).click();
+  await expect(
+    page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
-  await expect(page.locator('text=Hints').first()).toBeVisible();
+  await expect(page.getByLabel('Regular expression pattern')).toHaveValue('');
+
+  // Type a partial answer and reload — pattern should come back from
+  // localStorage as "\d" for "digit", not "hello" from the other exercise.
+  await page.getByLabel('Regular expression pattern').fill('\\d');
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
+
+  await page.reload();
+
+  // After reload we must land back on "digit" with "\d" pre-filled.
+  await expect(
+    page.getByRole('heading', { name: /^Find any digit$/i }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Regular expression pattern')).toHaveValue(
+    '\\d',
+  );
+  await expect(page.getByText(/2 \/ \d+ exercises solved/)).toBeVisible();
+
+  // And the menu badge for both exercises must show the solved tick icon.
+  const stored = await page.evaluate(() =>
+    JSON.parse(
+      window.localStorage.getItem('regexp-cheminfo:exercise-state:v1') ?? '{}',
+    ),
+  );
+  expect(stored['literal-hello']?.status).toBe('solved');
+  expect(stored.digit?.status).toBe('solved');
 });
 
 test('"Clear all answers" wipes localStorage after confirmation', async ({
