@@ -98,6 +98,24 @@ export function App() {
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <a
+            href="https://forms.gle/YWQZs7fntJBuv5xM6"
+            target="_blank"
+            rel="noreferrer"
+            title="Share your feedback (2-minute survey)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: '#5c7080',
+              textDecoration: 'none',
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            <Icon icon="comment" size={16} />
+            Feedback
+          </a>
+          <a
             href="https://tc39.es/ecma262/#sec-regexp-regular-expression-objects"
             target="_blank"
             rel="noreferrer"

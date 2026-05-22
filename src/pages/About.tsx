@@ -250,6 +250,14 @@ pattern = re.compile(r"""
             rel="noreferrer"
             text="Report an issue"
           />
+          <AnchorButton
+            icon="comment"
+            intent="primary"
+            href="https://forms.gle/YWQZs7fntJBuv5xM6"
+            target="_blank"
+            rel="noreferrer"
+            text="Share feedback (2 min)"
+          />
         </div>
       </Card>
     </div>

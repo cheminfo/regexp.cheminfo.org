@@ -83,14 +83,37 @@ Skip if you want the form really short — Q2 already covers usefulness.
 
 ---
 
+## Form URL
+
+**https://forms.gle/YWQZs7fntJBuv5xM6**
+
+---
+
 ## Where the link will go on the site
 
-Once you have the Google Form URL (typically
-`https://docs.google.com/forms/d/e/.../viewform`), paste it back. Planned
-placement:
+Planned placement:
 
 1. **About page** — bottom of the "About this site" card, as an
    `AnchorButton` with a `comment` or `feed` icon.
 2. **Top-right of the header** — a small minimal "Feedback" button next to
    the GitHub and ECMA-262 links, so it's visible from every page without
    being intrusive.
+
+---
+
+## How to push people to actually submit
+
+The biggest drop-off is forgetting or not caring. A few levers:
+
+- **Ask in class** — mention the survey at the end of the session where
+  students used the site; completion rates 3–5× higher than a passive link.
+- **QR code on slides** — generate a QR from the short link and put it on
+  the last slide. Students scan while still in the room.
+- **Banner on the site after ~5 minutes of use** — a `Callout` with a
+  close button ("You've been here a while — 2-minute feedback?"), shown
+  once per browser via `localStorage`.
+- **Completion page redirect** — after the last exercise, show a card
+  "Nice work! Mind sharing 2 minutes of feedback?" with the link.
+- **Course credit nudge** — if the site is used in a graded assignment,
+  mention that the feedback helps improve the tool for next year's cohort
+  (social / legacy motivation, not grade-linked).
