@@ -33,7 +33,12 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || pattern === '' || error) return;
+    if (!container) return;
+
+    if (pattern === '' || error) {
+      container.replaceChildren();
+      return;
+    }
 
     let cancelled = false;
     let job: RegexperJob | null = null;
@@ -69,31 +74,19 @@ export function RegexDiagram({ pattern, flags, error }: Props) {
     };
   }, [pattern, flags, error]);
 
+  let message: string | null = null;
   if (pattern === '') {
-    return (
-      <div className="viz-diagram">
-        <div className="viz-empty">
-          Type a regular expression to see its diagram.
-        </div>
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div className="viz-diagram">
-        <div className="viz-empty">
-          The regex is not valid yet, fix the error to see the diagram.
-        </div>
-      </div>
-    );
-  }
-  if (renderError) {
-    return (
-      <div className="viz-diagram">
-        <div className="viz-empty">Could not render diagram: {renderError}</div>
-      </div>
-    );
+    message = 'Type a regular expression to see its diagram.';
+  } else if (error) {
+    message = 'The regex is not valid yet, fix the error to see the diagram.';
+  } else if (renderError) {
+    message = `Could not render diagram: ${renderError}`;
   }
 
-  return <div ref={containerRef} className="viz-diagram" />;
+  return (
+    <div className="viz-diagram">
+      <div ref={containerRef} />
+      {message !== null && <div className="viz-empty">{message}</div>}
+    </div>
+  );
 }
