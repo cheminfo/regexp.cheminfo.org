@@ -69,11 +69,18 @@ read by the Docker container (the static-web-server inside it).
 ## Tests, lint and type checks
 
 ```sh
-npm run test
+npm run test       # vitest + tsc + eslint + prettier
+npm run test-e2e   # Playwright (Chromium) end-to-end suite
 ```
 
-This runs unit tests with coverage, the TypeScript checker, ESLint and
-Prettier.
+`npm run test` runs the fast gate: unit tests with coverage, the
+TypeScript checker, ESLint and Prettier.
+
+`npm run test-e2e` boots the Vite dev server and exercises the live UI
+(tutorial, playground, exercises with `localStorage` persistence,
+cheatsheet, glossary, about, header links, hash routing). First-time
+setup requires `npx playwright install --with-deps chromium`. Use
+`npm run test-e2e-ui` for the interactive Playwright runner.
 
 ## Production build
 
