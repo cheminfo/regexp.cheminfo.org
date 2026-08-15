@@ -4,6 +4,38 @@
     'Courier New', monospace;
   --match-bg: #fde68a;
   --match-active: #f59e0b;
+
+  /* Neutrals, geometry and type shared by every *.cheminfo.org site. */
+  --surface: #ffffff;
+  --surface-sunken: #f5f7fa;
+  --surface-raised: #ffffff;
+  --border: #dfe3e8;
+  --border-strong: #c3cad3;
+  --text: #16202c;
+  --text-muted: #5b6875;
+  --text-faint: #8a96a3;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgb(16 32 48 / 8%);
+  --shadow-md: 0 4px 14px rgb(16 32 48 / 10%);
+  --shadow-lg: 0 12px 32px rgb(16 32 48 / 16%);
+
+  --header-height: 3.5rem;
+  --page-max: 1400px;
+
+  /* The two colours this site owns: the notation set on a navy plate, the way
+     the mark writes it. */
+  --brand: #1e3a8a;
+  --brand-alt: #fde047;
+
+  /* The mark's yellow reaches 1.3:1 on white — nowhere near enough for text, so
+     set text in a darkened one (4.9:1) of the same hue. */
+  --brand-alt-text: #a16207;
+
+  --accent: var(--brand);
+
+  color-scheme: light;
 }
 
 *,
@@ -22,10 +54,130 @@ body,
 #root {
   margin: 0;
   min-height: 100%;
-  background: white;
+  background: var(--surface-sunken);
+  color: var(--text);
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* The size goes on `body`, never on `html`: `rem` must stay the browser's 16px
+   so the shared geometry measures the same on every site in the family. */
+body {
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+/* ── The shared chrome ─────────────────────────────────────────────────────── */
+
+.app-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.app-header__inner {
+  display: flex;
+  height: var(--header-height);
+  max-width: var(--page-max);
+  align-items: center;
+  padding: 0 1.25rem;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  color: var(--text);
+  font-weight: 700;
+  gap: 0.55rem;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: block;
+  flex: none;
+}
+
+.wordmark {
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.wordmark__lead {
+  color: var(--brand);
+}
+
+.wordmark__dot {
+  color: var(--text-faint);
+}
+
+.wordmark__alt {
+  color: var(--brand-alt-text);
+}
+
+/* Six pages and three outside links: let them scroll rather than wrap the bar
+   into two rows. */
+.app-header-nav {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 0.15rem;
+  scrollbar-width: thin;
+}
+
+.app-header-sep {
+  width: 1px;
+  height: 1.5rem;
+  flex: none;
+  margin: 0 0.35rem;
+  background: var(--border);
+}
+
+/* Carried by both a link and a button, so the two read alike in the bar. */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background: var(--surface-sunken);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-link--active {
+  background: color-mix(in oklab, var(--accent) 12%, white);
+  color: var(--accent);
 }
 
 .bp6-tab-panel[role='tabpanel'] {
@@ -38,14 +190,10 @@ body,
   background-color: transparent;
 }
 
-.logo {
-  background: #fde047;
-  color: #0e5a91;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 700;
+.app-main {
+  max-width: var(--page-max);
+  padding: 1.25rem 1rem 3rem;
+  margin: 0 auto;
 }
 
 .section-stack {
@@ -863,7 +1011,7 @@ body,
     display: none !important;
   }
 
-  .app-shell {
+  .app-main {
     max-width: none !important;
     padding: 0 !important;
     margin: 0 !important;
