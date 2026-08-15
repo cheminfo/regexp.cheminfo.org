@@ -132,33 +132,17 @@ No host port is published.
 
 ## Deploy and rollback
 
-Never deploy with `git pull && docker compose up -d --build`: the build
-overwrites the running tag in place and `git pull` moves the source at the
-same time, so there is nothing left to go back to. Use `./deploy.sh`.
+Deployment is handled by the deploy script installed on the server, not by
+anything in this repository. Never deploy by hand with
+`git pull && docker compose up -d --build`: the build overwrites the running
+tag in place while `git pull` moves the source underneath it, leaving neither
+an image nor a commit to go back to.
 
-```sh
-./deploy.sh                                  # pull, build, start, health-check, auto-revert on failure
-./deploy.sh rollback                         # back to the previous known-good deploy
-./deploy.sh rollback 20260801-1332-a1b2c3d   # back to a specific one
-./deploy.sh list                             # what is running, and what can be rolled back to
-./deploy.sh prune                            # drop images older than the last 10 deploys
-```
-
-Each deploy builds an immutable tag `<utc date>-<utc hhmm>-<short sha>`,
-writes it to `IMAGE_TAG` in `.env`, and appends `date tag commit` to
-`.deploy/history`. The build runs before `up`, so a failed build never
-touches the running stack; the new container is then probed on `/` from
-inside the container (the traefik and cloudflared modes publish no host
-port) and automatically reverted if it does not answer.
-
-A rollback rewrites `IMAGE_TAG` and checks out the recorded commit, so the
-image and the compose file, Dockerfile and build that go with it move back
-together. It needs no build and no network. The checkout is left on a
-detached HEAD on purpose — `deploy.sh` refuses to deploy from there until
-you `git checkout main`.
-
-The last 10 images are kept; older ones are removed after each successful
-deploy. Raise `KEEP` in `deploy.sh` to keep a longer history.
+What this repository provides is what that script consumes: every compose file
+resolves `${IMAGE_NAME:-…}:${IMAGE_TAG:-latest}`, so each build gets an
+immutable tag that stays reachable for a rollback, and both variables are
+declared in `.env.example`. The script rewrites `IMAGE_TAG` in `.env` and keeps
+its per-host state in `.deploy/`, which is gitignored.
 
 ## Environment variables
 
@@ -167,7 +151,7 @@ deploy. Raise `KEEP` in `deploy.sh` to keep a longer history.
 | `COMPOSE_FILE` | Deployment mode: `compose.yaml` (default), `compose.traefik.yaml`, `compose.cloudflared.yaml`. |
 | `PORT`         | Port the container serves on, and publishes in port mode. Defaults to 10801.                   |
 | `IMAGE_NAME`   | Image selected by every compose file. Defaults to `ghcr.io/cheminfo/regexp.cheminfo.org`.      |
-| `IMAGE_TAG`    | Tag deployed. Rewritten by `./deploy.sh` — do not edit by hand.                                |
+| `IMAGE_TAG`    | Tag deployed. Rewritten by the server's deploy script — do not edit by hand.                   |
 | `TUNNEL_TOKEN` | Cloudflare Tunnel token (cloudflared deployment only).                                         |
 
 ## Changelog

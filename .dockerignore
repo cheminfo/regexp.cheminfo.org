@@ -10,6 +10,5 @@ e2e
 .deploy
 .env
 compose*.yaml
-deploy.sh
 *.log
 .DS_Store
