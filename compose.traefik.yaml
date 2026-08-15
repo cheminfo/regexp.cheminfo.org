@@ -1,0 +1,46 @@
+# Traefik reverse-proxy deployment — no port published on the host.
+# Requires an external Docker network named "traefik" with a websecure entrypoint
+# and a letsencrypt cert resolver already running on this host.
+# cp .env.example .env   # uncomment: COMPOSE_FILE=compose.traefik.yaml
+# docker compose up -d
+services:
+  regexp-cheminfo-org:
+    # IMAGE_TAG is managed by ./deploy.sh so every build stays addressable for
+    # a rollback. Unset, this runs the released :latest image.
+    image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
+    build: .
+    env_file: .env
+    environment:
+      SERVER_PORT: ${PORT:-10801}
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 256
+    ulimits:
+      core: 0
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: '3'
+    networks:
+      - traefik
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.regexp-cheminfo-org.rule=Host(`regexp.cheminfo.org`)'
+      - 'traefik.http.routers.regexp-cheminfo-org.entrypoints=websecure'
+      - 'traefik.http.routers.regexp-cheminfo-org.tls=true'
+      - 'traefik.http.routers.regexp-cheminfo-org.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.regexp-cheminfo-org.loadbalancer.server.port=${PORT:-10801}'
+
+networks:
+  traefik:
+    external: true

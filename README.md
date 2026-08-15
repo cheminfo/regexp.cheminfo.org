@@ -62,9 +62,9 @@ npm install
 npm run dev
 ```
 
-Then open the URL printed by Vite (typically `http://localhost:5173`).
-The Vite dev server picks its own port; `PORT` from `.env` is only
-read by the Docker container (the static-web-server inside it).
+Then open `http://localhost:10802`. The dev server port is `PORT + 1`,
+so the single derived `PORT` (10801, from the project creation date)
+drives both the container and the dev server. Override with `VITE_PORT`.
 
 ## Tests, lint and type checks
 
@@ -93,67 +93,82 @@ The static site is emitted to `dist/`.
 
 ## Docker deployment
 
-Three deployment modes are shipped as `compose.example.*.yaml`. Each
-one exposes both `image:` and `build: .`, so you can either pull the
-released image (`docker compose pull && docker compose up -d`) or
-build from the current checkout (`docker compose up -d --build`).
-
-Always start with:
+Three deployment modes are shipped, one compose file each. Every one
+exposes both `image:` and `build: .`, so you can either pull the released
+image (`docker compose pull && docker compose up -d`) or build from the
+current checkout (`docker compose up -d --build`).
 
 ```sh
 cp .env.example .env
-# edit .env if needed (PORT for host-port mode, TUNNEL_TOKEN for cloudflared)
-```
-
-### Port mode (`compose.example.yaml`)
-
-Exposes the static site on a host port. The container always serves
-on port 80; the host port is configured via `PORT` in `.env`
-(default 8080).
-
-```sh
-cp compose.example.yaml compose.yaml
+# uncomment exactly one COMPOSE_FILE line, then:
 docker compose up -d
 ```
 
-### Cloudflare Tunnel (`compose.example.cloudflared.yaml`)
+With no `COMPOSE_FILE` uncommented, `docker compose` uses `compose.yaml`.
 
-Public HTTPS via Cloudflare Tunnel, by default published at
-`regexp.lactame.com`. No host port is exposed.
+### Port mode (`compose.yaml`)
 
-1. In the Cloudflare dashboard (https://dash.cloudflare.com):
-   *Networking → Tunnels → Create a tunnel → Cloudflared connector*.
+Publishes the static site on `PORT` (default 10801), which is also the
+port the container serves on.
+
+### Traefik (`compose.traefik.yaml`)
+
+For an existing Traefik instance serving `regexp.cheminfo.org`. Requires
+an external Docker network named `traefik` with a `websecure` entrypoint
+and a `letsencrypt` cert resolver. No host port is published. Adjust the
+`Host(...)` label for a different hostname.
+
+### Cloudflare Tunnel (`compose.cloudflared.yaml`)
+
+Public HTTPS via Cloudflare Tunnel, by default at `regexp.lactame.com`.
+No host port is published.
+
+1. Cloudflare dashboard: _Networking → Tunnels → Create a tunnel →
+   Cloudflared connector_.
 2. Copy the connector token into `.env` as `TUNNEL_TOKEN=...`.
-3. Open the new tunnel, go to the **Published applications** tab and
-   add an application with `Service = HTTP`,
-   URL = `regexp-cheminfo-org:80`, hostname `regexp.lactame.com`
-   (or any host you chose in Cloudflare).
-4. Deploy:
+3. Open the tunnel, **Published applications** tab, add an application
+   with `Service = HTTP`, URL `regexp-cheminfo-org:10801`, hostname
+   `regexp.lactame.com`.
+
+## Deploy and rollback
+
+Never deploy with `git pull && docker compose up -d --build`: the build
+overwrites the running tag in place and `git pull` moves the source at the
+same time, so there is nothing left to go back to. Use `./deploy.sh`.
 
 ```sh
-cp compose.example.cloudflared.yaml compose.yaml
-docker compose up -d
+./deploy.sh                                  # pull, build, start, health-check, auto-revert on failure
+./deploy.sh rollback                         # back to the previous known-good deploy
+./deploy.sh rollback 20260801-1332-a1b2c3d   # back to a specific one
+./deploy.sh list                             # what is running, and what can be rolled back to
+./deploy.sh prune                            # drop images older than the last 10 deploys
 ```
 
-### Traefik (`compose.example.traefik.yaml`)
+Each deploy builds an immutable tag `<utc date>-<utc hhmm>-<short sha>`,
+writes it to `IMAGE_TAG` in `.env`, and appends `date tag commit` to
+`.deploy/history`. The build runs before `up`, so a failed build never
+touches the running stack; the new container is then probed on `/` from
+inside the container (the traefik and cloudflared modes publish no host
+port) and automatically reverted if it does not answer.
 
-For deployment behind an existing Traefik instance on
-`regexp.cheminfo.org`. Requires the host to already run Traefik on
-an external Docker network named `traefik` (with a `websecure`
-entrypoint and a `letsencrypt` cert resolver). Adjust the `Host(...)`
-label inside the compose file if you want a different hostname.
+A rollback rewrites `IMAGE_TAG` and checks out the recorded commit, so the
+image and the compose file, Dockerfile and build that go with it move back
+together. It needs no build and no network. The checkout is left on a
+detached HEAD on purpose — `deploy.sh` refuses to deploy from there until
+you `git checkout main`.
 
-```sh
-cp compose.example.traefik.yaml compose.yaml
-docker compose up -d
-```
+The last 10 images are kept; older ones are removed after each successful
+deploy. Raise `KEEP` in `deploy.sh` to keep a longer history.
 
 ## Environment variables
 
-| Name           | Description                                              |
-| -------------- | -------------------------------------------------------- |
-| `PORT`         | Host port to publish (port mode only). Defaults to 8080. |
-| `TUNNEL_TOKEN` | Cloudflare Tunnel token (cloudflared deployment only).   |
+| Name           | Description                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| `COMPOSE_FILE` | Deployment mode: `compose.yaml` (default), `compose.traefik.yaml`, `compose.cloudflared.yaml`. |
+| `PORT`         | Port the container serves on, and publishes in port mode. Defaults to 10801.                   |
+| `IMAGE_NAME`   | Image selected by every compose file. Defaults to `ghcr.io/cheminfo/regexp.cheminfo.org`.      |
+| `IMAGE_TAG`    | Tag deployed. Rewritten by `./deploy.sh` — do not edit by hand.                                |
+| `TUNNEL_TOKEN` | Cloudflare Tunnel token (cloudflared deployment only).                                         |
 
 ## Changelog
 

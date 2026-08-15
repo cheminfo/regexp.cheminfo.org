@@ -3,15 +3,23 @@
 # Cloudflare dashboard (https://dash.cloudflare.com):
 #   Networking → Tunnels → Create a tunnel → Cloudflared connector →
 #   copy the token into .env as TUNNEL_TOKEN=... → open the tunnel →
-#   Published applications tab → add application with
-#   Service = HTTP, URL = regexp-cheminfo-org:80, hostname = regexp.lactame.com.
+#   Published applications tab → add application with Service = HTTP,
+#   URL = regexp-cheminfo-org:${PORT}, hostname = regexp.lactame.com.
 #
-# Copy this file to compose.yaml and run: docker compose up -d
+# cp .env.example .env   # uncomment: COMPOSE_FILE=compose.cloudflared.yaml
+# docker compose up -d
 services:
   regexp-cheminfo-org:
-    image: ghcr.io/cheminfo/regexp.cheminfo.org:latest
+    # IMAGE_TAG is managed by ./deploy.sh so every build stays addressable for
+    # a rollback. Unset, this runs the released :latest image.
+    image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
+    env_file: .env
+    environment:
+      SERVER_PORT: ${PORT:-10801}
     init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -23,16 +31,17 @@ services:
     ulimits:
       core: 0
     logging:
+      driver: json-file
       options:
-        max-size: "5m"
-        max-file: "3"
-    restart: unless-stopped
+        max-size: 5m
+        max-file: '3'
 
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     env_file: .env
     init: true
+    restart: unless-stopped
     read_only: true
     security_opt:
       - no-new-privileges:true
@@ -44,7 +53,7 @@ services:
     ulimits:
       core: 0
     logging:
+      driver: json-file
       options:
-        max-size: "5m"
-        max-file: "2"
-    restart: unless-stopped
+        max-size: 5m
+        max-file: '2'

@@ -7,8 +7,9 @@ e2e
 .git
 .github
 .claude
+.deploy
 .env
-compose.yaml
-compose.example.*.yaml
+compose*.yaml
+deploy.sh
 *.log
 .DS_Store
