@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
     window.localStorage.removeItem('regexp-cheminfo:exercise-state:v1');
     window.localStorage.removeItem('regexp-cheminfo:active-exercise:v1');
   });
-  await page.goto('/#/exercises');
+  await page.goto('/exercises');
 });
 
 test('solving the first exercise marks it as done and persists in localStorage', async ({
@@ -26,9 +26,7 @@ test('solving the first exercise marks it as done and persists in localStorage',
 
   // Auto-solve via the effect kicks in as soon as validation passes — the
   // success Callout appears without the user clicking "Check".
-  await expect(
-    page.getByText(/Brilliant! Exercise solved\./),
-  ).toBeVisible();
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
 
   // Progress is incremented to 1 / N.
   await expect(page.getByText(/1 \/ \d+ exercises solved/)).toBeVisible();
@@ -49,9 +47,7 @@ test('solving the first exercise marks it as done and persists in localStorage',
 
 test('progress persists across a full page reload', async ({ page }) => {
   await page.getByLabel('Regular expression pattern').fill('hello');
-  await expect(
-    page.getByText(/Brilliant! Exercise solved\./),
-  ).toBeVisible();
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
 
   // Hard reload — the persisted state should still mark exercise 1 as solved.
   await page.reload();
@@ -168,9 +164,7 @@ test('"Clear all answers" wipes localStorage after confirmation', async ({
   page,
 }) => {
   await page.getByLabel('Regular expression pattern').fill('hello');
-  await expect(
-    page.getByText(/Brilliant! Exercise solved\./),
-  ).toBeVisible();
+  await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
 
   await page.getByRole('button', { name: /Clear all answers/i }).click();
 

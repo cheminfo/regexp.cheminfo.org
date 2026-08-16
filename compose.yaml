@@ -8,15 +8,19 @@ services:
     # addressable for a rollback. Unset, this runs the released :latest image.
     image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
-    env_file: .env
     environment:
       SERVER_PORT: ${PORT:-10801}
+      TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
     ports:
       - '${PORT:-10801}:${PORT:-10801}'
     init: true
     restart: unless-stopped
     stop_grace_period: 30s
     read_only: true
+    # The pages served are written here at startup, so the analytics snippet can
+    # go in them while the image filesystem stays read-only.
+    tmpfs:
+      - /public:rw,noexec,nosuid,size=128m
     security_opt:
       - no-new-privileges:true
     cap_drop:

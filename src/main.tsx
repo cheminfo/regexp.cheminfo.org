@@ -9,8 +9,13 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App.tsx';
+import { adoptLegacyHashAddress } from './state/router.ts';
 
 FocusStyleManager.onlyShowFocusOnTabs();
+
+// A link written while this site routed by the hash still opens: the address it
+// meant is put in the bar before anything reads the address.
+adoptLegacyHashAddress();
 
 const container = document.querySelector('#root');
 if (!container) {

@@ -4,13 +4,15 @@ test('loads on the Tutorial page by default', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveTitle(/RegExp/i);
-  await expect(page.getByRole('heading', { name: /Guided tour/i })).toBeVisible();
   await expect(
-    page.getByRole('tab', { name: 'Tutorial' }),
-  ).toHaveAttribute('aria-selected', 'true');
+    page.getByRole('heading', { name: /Guided tour/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Tutorial', exact: true }),
+  ).toHaveClass(/nav-link--active/);
 });
 
-test('header shows Feedback, ECMA-262 and GitHub links', async ({ page }) => {
+test('header shows Feedback, Spec and GitHub links', async ({ page }) => {
   await page.goto('/');
 
   const feedback = page.getByRole('link', { name: /Feedback/i });
@@ -18,8 +20,10 @@ test('header shows Feedback, ECMA-262 and GitHub links', async ({ page }) => {
   await expect(feedback).toHaveAttribute('href', /forms\.gle\//);
   await expect(feedback).toHaveAttribute('target', '_blank');
 
-  const spec = page.getByRole('link', { name: /ECMA-262/i });
+  // The link reads "Spec"; ECMA-262 is what its tooltip names.
+  const spec = page.getByRole('link', { name: 'Spec', exact: true });
   await expect(spec).toHaveAttribute('href', /tc39\.es\/ecma262/);
+  await expect(spec).toHaveAttribute('title', /ECMA-262/);
 
   const github = page.getByRole('link', { name: /Source on GitHub/i });
   await expect(github).toHaveAttribute(
@@ -49,7 +53,7 @@ test('all six tabs render their main heading without errors', async ({
   ];
 
   for (const tab of tabs) {
-    await page.getByRole('tab', { name: tab.name }).click();
+    await page.getByRole('link', { name: tab.name, exact: true }).click();
     await expect(
       page.getByRole('heading', { name: tab.heading }).first(),
     ).toBeVisible();
@@ -63,14 +67,12 @@ test('all six tabs render their main heading without errors', async ({
   ).toEqual([]);
 });
 
-test('URL hash routing: deep-link to Playground works on reload', async ({
-  page,
-}) => {
-  await page.goto('/#/playground');
+test('deep-link to Playground works on reload', async ({ page }) => {
+  await page.goto('/playground');
 
   await expect(
-    page.getByRole('tab', { name: 'Playground' }),
-  ).toHaveAttribute('aria-selected', 'true');
+    page.getByRole('link', { name: 'Playground', exact: true }),
+  ).toHaveClass(/nav-link--active/);
   await expect(
     page.getByRole('heading', { name: /Your regular expression/i }),
   ).toBeVisible();
@@ -79,7 +81,7 @@ test('URL hash routing: deep-link to Playground works on reload', async ({
 test('About page shows EPFL credit and grep / sed / Python snippets', async ({
   page,
 }) => {
-  await page.goto('/#/about');
+  await page.goto('/about');
 
   await expect(
     page.getByText(/This website is provided by Luc Patiny from/),

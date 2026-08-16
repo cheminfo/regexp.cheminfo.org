@@ -50,11 +50,11 @@ answers)_
 
 **Q4. The exercises:** _(Multiple-choice grid)_
 
-| Row                       | 1                  | 2   | 3              | 4   | 5                       |
-| ------------------------- | ------------------ | --- | -------------- | --- | ----------------------- |
-| Difficulty progression    | Too gentle         |     | Just right     |     | Too steep               |
-| Hint quality              | Useless            |     |                |     | Exactly what I needed   |
-| Test cases                | Confusing          |     |                |     | Clear                   |
+| Row                    | 1          | 2   | 3          | 4   | 5                     |
+| ---------------------- | ---------- | --- | ---------- | --- | --------------------- |
+| Difficulty progression | Too gentle |     | Just right |     | Too steep             |
+| Hint quality           | Useless    |     |            |     | Exactly what I needed |
+| Test cases             | Confusing  |     |            |     | Clear                 |
 
 > **Why:** the exercises are the most pedagogically loaded part of the site,
 > so this is where the most actionable signal lives. A multiple-choice grid

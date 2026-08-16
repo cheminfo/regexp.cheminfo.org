@@ -22,18 +22,16 @@ import { EXERCISES } from '../data/exercises.ts';
 import { compileRegex } from '../regex/compile.ts';
 import type { TestCaseResult } from '../regex/validate.ts';
 import { validateExercise } from '../regex/validate.ts';
+import { parsePath, routePath } from '../state/router.ts';
 import type { Exercise, ExerciseState } from '../types.ts';
 
 const STORAGE_KEY = 'regexp-cheminfo:exercise-state:v1';
 const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
 
-function readExerciseIdFromHash(): string | null {
-  const segments = globalThis.location.hash.replace(/^#\/?/, '').split('/');
-  if (segments[0] !== 'exercises') return null;
-  const id = segments[1];
-  if (!id) return null;
-  const decoded = decodeURIComponent(id);
-  return EXERCISES.some((ex) => ex.id === decoded) ? decoded : null;
+function readExerciseIdFromAddress(): string | null {
+  const { exerciseId } = parsePath(globalThis.location.pathname);
+  if (!exerciseId) return null;
+  return EXERCISES.some((ex) => ex.id === exerciseId) ? exerciseId : null;
 }
 
 function readLastExerciseId(): string | null {
@@ -116,7 +114,7 @@ const FIRST_EXERCISE: Exercise | undefined = EXERCISES[0];
 export function Exercises() {
   const [activeId, setActiveIdState] = useState<string>(() => {
     const id =
-      readExerciseIdFromHash() ??
+      readExerciseIdFromAddress() ??
       readLastExerciseId() ??
       FIRST_EXERCISE?.id ??
       '';
@@ -137,6 +135,13 @@ export function Exercises() {
   const selectExercise = useCallback((id: string) => {
     setActiveIdState(id);
     writeLastExerciseId(id);
+    // Each exercise is an address of its own, so it can be handed out and
+    // indexed rather than only reached by clicking down the list.
+    globalThis.history.pushState(
+      null,
+      '',
+      routePath({ page: 'exercises', exerciseId: id }),
+    );
   }, []);
 
   const updateState = useCallback(

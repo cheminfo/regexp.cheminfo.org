@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/#/playground');
+  await page.goto('/playground');
 });
 
 test('default regex highlights words of 4+ chars in the sample text', async ({
@@ -43,9 +43,7 @@ test('invalid regex shows a parse error and clears the diagram', async ({
   await expect(page.locator('.regex-error')).toContainText(
     /Invalid|Unterminated/,
   );
-  await expect(
-    page.getByText(/The regex is not valid yet/),
-  ).toBeVisible();
+  await expect(page.getByText(/The regex is not valid yet/)).toBeVisible();
 });
 
 test('flag toggles update the pattern flags string', async ({ page }) => {

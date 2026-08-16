@@ -1,6 +1,6 @@
 import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
-import { EcosystemButton } from 'react-cheminfo/ui';
+import { EcosystemButton, EcosystemLinks } from 'react-cheminfo/ui';
 
 import { BrandMark, Wordmark } from './components/Brand.tsx';
 import { About } from './pages/About.tsx';
@@ -9,83 +9,77 @@ import { Exercises } from './pages/Exercises.tsx';
 import { Glossary } from './pages/Glossary.tsx';
 import { Playground } from './pages/Playground.tsx';
 import { Tutorial } from './pages/Tutorial.tsx';
-
-type Route =
-  'tutorial' | 'playground' | 'exercises' | 'cheatsheet' | 'glossary' | 'about';
-
-const ROUTES: Array<{ id: Route; label: string }> = [
-  { id: 'tutorial', label: 'Tutorial' },
-  { id: 'playground', label: 'Playground' },
-  { id: 'exercises', label: 'Exercises' },
-  { id: 'cheatsheet', label: 'Cheatsheet' },
-  { id: 'glossary', label: 'Glossary' },
-  { id: 'about', label: 'About' },
-];
-
-const VALID_ROUTES = new Set<string>(ROUTES.map((r) => r.id));
+import { writeDocumentMeta } from './state/documentMeta.ts';
+import type { Page } from './state/router.ts';
+import { PAGES, parsePath, routePath } from './state/router.ts';
 
 const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
 
-function parseHash(hash: string): Route {
-  const [first] = hash.replace(/^#\/?/, '').split('/');
-  if (first && VALID_ROUTES.has(first)) {
-    return first as Route;
-  }
-  return 'tutorial';
-}
-
 /**
- * Root application component. Hosts a hash-based router that swaps between
- * the four pedagogic pages: tutorial, playground, exercises, cheatsheet.
+ * Root application component. Hosts a path-based router that swaps between the
+ * pedagogic pages: tutorial, playground, exercises, cheatsheet, glossary.
  * @returns The application root.
  */
 export function App() {
-  const [route, setRoute] = useState<Route>(() =>
-    parseHash(globalThis.location.hash),
+  const [route, setRoute] = useState<Page>(
+    () => parsePath(globalThis.location.pathname).page,
   );
 
   useEffect(() => {
-    function onHashChange() {
-      setRoute(parseHash(globalThis.location.hash));
+    // Also on mount: the build titles each file it wrote, but a page reached
+    // through the SPA fallback — every address in dev, an unprerendered one in
+    // production — otherwise keeps the title of the file that answered.
+    writeDocumentMeta();
+
+    function onPopState() {
+      setRoute(parsePath(globalThis.location.pathname).page);
+      writeDocumentMeta();
     }
-    globalThis.addEventListener('hashchange', onHashChange);
+    globalThis.addEventListener('popstate', onPopState);
     return () => {
-      globalThis.removeEventListener('hashchange', onHashChange);
+      globalThis.removeEventListener('popstate', onPopState);
     };
   }, []);
 
-  const handleTabChange = useCallback((tabId: string) => {
-    let target = `#/${tabId}`;
-    if (tabId === 'exercises') {
+  const handleTabChange = useCallback((page: Page) => {
+    let target = routePath({ page });
+    if (page === 'exercises') {
       const lastExercise = globalThis.localStorage.getItem(LAST_EXERCISE_KEY);
       if (lastExercise) {
-        target = `#/exercises/${encodeURIComponent(lastExercise)}`;
+        target = routePath({ page, exerciseId: lastExercise });
       }
     }
     globalThis.history.pushState(null, '', target);
-    setRoute(tabId as Route);
+    setRoute(page);
+    writeDocumentMeta();
   }, []);
 
   return (
     <div className="app-shell">
       <header className="app-header no-print">
         <div className="app-header__inner">
-          <a href="#/tutorial" className="brand" title="regexp.cheminfo.org">
+          <a href="/tutorial" className="brand" title="regexp.cheminfo.org">
             <BrandMark />
             <Wordmark />
           </a>
           <nav className="app-header-nav">
-            {ROUTES.map((r) => (
-              <button
-                key={r.id}
-                type="button"
+            {PAGES.map((page) => (
+              <a
+                key={page.id}
+                href={routePath({ page: page.id })}
                 className={
-                  r.id === route ? 'nav-link nav-link--active' : 'nav-link'
+                  page.id === route ? 'nav-link nav-link--active' : 'nav-link'
                 }
-                onClick={() => handleTabChange(r.id)}
+                onClick={(event) => {
+                  // A real link, so a crawler walks the site and a middle click
+                  // opens a tab; the plain click is the one taken over.
+                  if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+                  event.preventDefault();
+                  handleTabChange(page.id);
+                }}
               >
-                {r.label}
-              </button>
+                {page.label}
+              </a>
             ))}
           </nav>
           <div className="app-header-actions">
@@ -141,6 +135,12 @@ export function App() {
         {route === 'glossary' && <Glossary />}
         {route === 'about' && <About />}
       </main>
+
+      <footer className="app-footer no-print">
+        <div className="app-footer__inner">
+          <EcosystemLinks currentSiteId="regexp" />
+        </div>
+      </footer>
     </div>
   );
 }

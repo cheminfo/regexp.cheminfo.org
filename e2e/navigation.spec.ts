@@ -7,49 +7,47 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('clicking each tab updates the URL hash and the selected tab', async ({
+test('clicking each page updates the address and the current page', async ({
   page,
 }) => {
   await page.goto('/');
 
-  const tabs: Array<{ name: string; hash: RegExp }> = [
-    { name: 'Playground', hash: /#\/playground$/ },
-    { name: 'Exercises', hash: /#\/exercises(\/|$)/ },
-    { name: 'Cheatsheet', hash: /#\/cheatsheet$/ },
-    { name: 'Glossary', hash: /#\/glossary$/ },
-    { name: 'About', hash: /#\/about$/ },
-    { name: 'Tutorial', hash: /#\/tutorial$/ },
+  const pages: Array<{ name: string; url: RegExp }> = [
+    { name: 'Playground', url: /\/playground$/ },
+    { name: 'Exercises', url: /\/exercises(\/|$)/ },
+    { name: 'Cheatsheet', url: /\/cheatsheet$/ },
+    { name: 'Glossary', url: /\/glossary$/ },
+    { name: 'About', url: /\/about$/ },
+    { name: 'Tutorial', url: /\/$/ },
   ];
 
-  for (const tab of tabs) {
-    const trigger = page.getByRole('tab', { name: tab.name });
+  for (const entry of pages) {
+    const trigger = page.getByRole('link', { name: entry.name, exact: true });
 
     await trigger.click();
-    await expect(trigger).toHaveAttribute('aria-selected', 'true');
-    await expect(page).toHaveURL(tab.hash);
+    await expect(trigger).toHaveClass(/nav-link--active/);
+    await expect(page).toHaveURL(entry.url);
   }
 });
 
-test('browser back/forward navigates between tabs via hashchange', async ({
-  page,
-}) => {
+test('browser back/forward navigates between pages', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('tab', { name: 'Playground' }).click();
-  await page.getByRole('tab', { name: 'Glossary' }).click();
+  await page.getByRole('link', { name: 'Playground', exact: true }).click();
+  await page.getByRole('link', { name: 'Glossary', exact: true }).click();
 
-  await expect(page).toHaveURL(/#\/glossary$/);
+  await expect(page).toHaveURL(/\/glossary$/);
 
   await page.goBack();
-  await expect(page).toHaveURL(/#\/playground$/);
+  await expect(page).toHaveURL(/\/playground$/);
   await expect(
-    page.getByRole('tab', { name: 'Playground' }),
-  ).toHaveAttribute('aria-selected', 'true');
+    page.getByRole('link', { name: 'Playground', exact: true }),
+  ).toHaveClass(/nav-link--active/);
 
   await page.goForward();
-  await expect(page).toHaveURL(/#\/glossary$/);
+  await expect(page).toHaveURL(/\/glossary$/);
   await expect(
-    page.getByRole('tab', { name: 'Glossary' }),
-  ).toHaveAttribute('aria-selected', 'true');
+    page.getByRole('link', { name: 'Glossary', exact: true }),
+  ).toHaveClass(/nav-link--active/);
 });
 
 test('opening Exercises restores the last active exercise from localStorage', async ({
@@ -57,9 +55,9 @@ test('opening Exercises restores the last active exercise from localStorage', as
 }) => {
   // Pick exercise #3 ("digit") and verify it persists across a navigation
   // away + back. The in-page "select another exercise" buttons do NOT push
-  // a new hash (only switching the top-level Tab does), but the active id
+  // a new address entry the same way, but the active id
   // is written to localStorage immediately.
-  await page.goto('/#/exercises');
+  await page.goto('/exercises');
   await page.getByRole('button', { name: /^Find any digit/i }).click();
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
@@ -76,19 +74,19 @@ test('opening Exercises restores the last active exercise from localStorage', as
 
   // Navigate away and back via the Tab component — the deep link pushed by
   // handleTabChange now includes the active exercise id.
-  await page.getByRole('tab', { name: 'Tutorial' }).click();
-  await page.getByRole('tab', { name: 'Exercises' }).click();
+  await page.getByRole('link', { name: 'Tutorial', exact: true }).click();
+  await page.getByRole('link', { name: 'Exercises', exact: true }).click();
 
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
-  await expect(page).toHaveURL(/#\/exercises\/digit$/);
+  await expect(page).toHaveURL(/\/exercises\/digit$/);
 });
 
 test('hovering a flag toggle button reveals its BlueprintJS tooltip', async ({
   page,
 }) => {
-  await page.goto('/#/playground');
+  await page.goto('/playground');
 
   const ignoreCase = page.getByRole('button', { name: /^i · ignoreCase$/i });
   await ignoreCase.hover();
@@ -105,7 +103,7 @@ test('last active exercise survives a full page reload (localStorage)', async ({
   page,
 }) => {
   // Select "Find any digit" so localStorage records "digit" as active.
-  await page.goto('/#/exercises');
+  await page.goto('/exercises');
   await page.getByRole('button', { name: /^Find any digit/i }).click();
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
@@ -119,21 +117,21 @@ test('last active exercise survives a full page reload (localStorage)', async ({
     )
     .toBe('digit');
 
-  // Reload directly on /#/exercises (no exercise id in the hash) — the page
+  // Reload directly on /exercises (no exercise id in the address) — the page
   // must restore "digit" from localStorage rather than defaulting to the
   // first exercise.
-  await page.goto('/#/exercises');
+  await page.goto('/exercises');
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
 });
 
-test('an unknown hash falls back to the Tutorial tab', async ({ page }) => {
-  await page.goto('/#/this-route-does-not-exist');
+test('an unknown address falls back to the Tutorial page', async ({ page }) => {
+  await page.goto('/this-route-does-not-exist');
 
   await expect(
-    page.getByRole('tab', { name: 'Tutorial' }),
-  ).toHaveAttribute('aria-selected', 'true');
+    page.getByRole('link', { name: 'Tutorial', exact: true }),
+  ).toHaveClass(/nav-link--active/);
   await expect(
     page.getByRole('heading', { name: /Guided tour/i }),
   ).toBeVisible();
