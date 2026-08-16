@@ -293,7 +293,7 @@ export const EXERCISES: Exercise[] = [
     ],
     hints: [
       String.raw`\s matches one whitespace character (space, tab, newline).`,
-      String.raw`Use the + quantifier to match one or more.`,
+      'Use the + quantifier to match one or more.',
       String.raw`Pattern \s+ with replacement " " (a single space) and flag g.`,
     ],
     solution: String.raw`\s+`,
@@ -442,10 +442,10 @@ export const EXERCISES: Exercise[] = [
     ],
     hints: [
       'A tag starts with < and ends with >.',
-      String.raw`Inside the tag, match anything except > — that is [^>]*.`,
-      String.raw`Try <[^>]*> with an empty replacement and flag g.`,
+      'Inside the tag, match anything except > — that is [^>]*.',
+      'Try <[^>]*> with an empty replacement and flag g.',
     ],
-    solution: String.raw`<[^>]*>`,
+    solution: '<[^>]*>',
     solutionReplacement: '',
   },
 ];

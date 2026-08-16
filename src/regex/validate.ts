@@ -79,25 +79,21 @@ export function validateExercise(
 
 function emptyCases(exercise: Exercise): TestCaseResult[] {
   if (exercise.kind === 'replace') {
-    return exercise.testCases.map(
-      (testCase): ReplaceTestCaseResult => ({
-        kind: 'replace',
-        testCase,
-        passed: false,
-        reason: 'not evaluated',
-        actual: null,
-      }),
-    );
-  }
-  return exercise.testCases.map(
-    (testCase): MatchTestCaseResult => ({
-      kind: 'match',
+    return exercise.testCases.map((testCase): ReplaceTestCaseResult => ({
+      kind: 'replace',
       testCase,
       passed: false,
       reason: 'not evaluated',
       actual: null,
-    }),
-  );
+    }));
+  }
+  return exercise.testCases.map((testCase): MatchTestCaseResult => ({
+    kind: 'match',
+    testCase,
+    passed: false,
+    reason: 'not evaluated',
+    actual: null,
+  }));
 }
 
 function validateMatchCases(

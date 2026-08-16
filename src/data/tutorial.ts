@@ -156,7 +156,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   {
     level: 'advanced',
     title: 'Named capture groups',
-    description: String.raw`Give a group a name with (?<name>...) — a [[named capture group]]. In the replacement, refer to it with $<name>. Names make complex replacements far easier to read than $1, $2, $3.`,
+    description:
+      'Give a group a name with (?<name>...) — a [[named capture group]]. In the replacement, refer to it with $<name>. Names make complex replacements far easier to read than $1, $2, $3.',
     pattern: String.raw`(?<first>\w+)\s+(?<last>\w+)`,
     flags: 'g',
     text: 'John Doe, Jane Smith, Alan Turing',

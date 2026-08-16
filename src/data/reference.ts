@@ -568,7 +568,7 @@ export const REFERENCE_SECTIONS: ReferenceSection[] = [
         tag: 'Escape sequence',
         detail: String.raw`Matches the character at code-point U+YYYY (exactly four hex digits). Under the u flag you can also write \u{1F600} with one to six hex digits to address any code point including astral-plane characters.`,
         example: {
-          pattern: String.raw`/é/g`,
+          pattern: '/é/g',
           input: 'café',
           note: 'matches the "é" — U+00E9 — even when the source uses the escape rather than the literal letter.',
         },
@@ -648,7 +648,7 @@ export const REFERENCE_SECTIONS: ReferenceSection[] = [
         detail:
           'Expands to the portion of the input that appears AFTER the current match. The mirror of $`.',
         example: {
-          pattern: String.raw`"foo-bar".replace(/-/, "$'")`,
+          pattern: '"foo-bar".replace(/-/, "$\'")',
           input: 'foo-bar',
           note: 'replaces the dash with the suffix "bar", producing "foobarbar".',
         },

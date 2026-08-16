@@ -1,5 +1,6 @@
 import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
+import { EcosystemButton } from 'react-cheminfo/ui';
 
 import { BrandMark, Wordmark } from './components/Brand.tsx';
 import { About } from './pages/About.tsx';
@@ -10,12 +11,7 @@ import { Playground } from './pages/Playground.tsx';
 import { Tutorial } from './pages/Tutorial.tsx';
 
 type Route =
-  | 'tutorial'
-  | 'playground'
-  | 'exercises'
-  | 'cheatsheet'
-  | 'glossary'
-  | 'about';
+  'tutorial' | 'playground' | 'exercises' | 'cheatsheet' | 'glossary' | 'about';
 
 const ROUTES: Array<{ id: Route; label: string }> = [
   { id: 'tutorial', label: 'Tutorial' },
@@ -91,7 +87,8 @@ export function App() {
                 {r.label}
               </button>
             ))}
-            <span className="app-header-sep" />
+          </nav>
+          <div className="app-header-actions">
             <a
               href="https://forms.gle/YWQZs7fntJBuv5xM6"
               target="_blank"
@@ -131,7 +128,8 @@ export function App() {
                 <path d="M12 .5C5.73.5.99 5.24.99 11.51c0 4.86 3.15 8.98 7.52 10.43.55.1.75-.24.75-.53 0-.26-.01-1.13-.02-2.05-3.06.66-3.71-1.3-3.71-1.3-.5-1.27-1.22-1.61-1.22-1.61-1-.68.08-.67.08-.67 1.1.08 1.68 1.13 1.68 1.13.98 1.68 2.57 1.19 3.2.91.1-.71.38-1.19.69-1.46-2.44-.28-5.01-1.22-5.01-5.42 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.11-2.92 0 0 .92-.29 3.02 1.12.88-.24 1.82-.36 2.76-.36s1.88.12 2.76.36c2.1-1.41 3.02-1.12 3.02-1.12.6 1.52.22 2.64.11 2.92.7.77 1.13 1.75 1.13 2.95 0 4.21-2.57 5.14-5.02 5.41.39.34.74 1 .74 2.02 0 1.46-.01 2.64-.01 3 0 .29.2.64.76.53 4.37-1.46 7.51-5.58 7.51-10.43C23.01 5.24 18.27.5 12 .5z" />
               </svg>
             </a>
-          </nav>
+            <EcosystemButton currentSiteId="regexp" />
+          </div>
         </div>
       </header>
 

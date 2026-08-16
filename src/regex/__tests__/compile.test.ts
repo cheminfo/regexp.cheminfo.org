@@ -41,7 +41,7 @@ test('findMatches survives zero-width matches', () => {
 });
 
 test('findMatches captures prefix, suffix and numbered groups', () => {
-  const { regex } = compileRegex(String.raw`(hello) (world)`, '');
+  const { regex } = compileRegex('(hello) (world)', '');
   const result = findMatches(regex, 'before hello world after');
 
   expect(result.matches).toHaveLength(1);
@@ -70,7 +70,7 @@ test('findMatches captures named groups', () => {
 });
 
 test('findMatches preserves undefined for non-participating groups', () => {
-  const { regex } = compileRegex(String.raw`(a)|(b)`, '');
+  const { regex } = compileRegex('(a)|(b)', '');
   const result = findMatches(regex, 'a');
 
   expect(result.matches[0]?.groups).toStrictEqual(['a', undefined]);
