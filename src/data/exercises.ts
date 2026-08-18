@@ -8,6 +8,8 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Write a regular expression that matches the exact word "hello" (lowercase). For now we are testing whether the regex finds the word anywhere in the text.',
+    metaDescription:
+      'Practise the simplest regular expression there is: a run of plain letters that matches the exact lowercase word hello anywhere in a text.',
     testCases: [
       { text: 'hello world', shouldMatch: true, expected: 'hello' },
       { text: 'oh, hello!', shouldMatch: true, expected: 'hello' },
@@ -27,6 +29,8 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Match the word "hello" regardless of its capitalization. Hint: there is a flag for this.',
+    metaDescription:
+      'Match hello, HELLO and Hello with a single pattern by adding the JavaScript i flag, the switch that makes a regular expression case-insensitive.',
     solutionFlags: ['i'],
     testCases: [
       { text: 'hello world', shouldMatch: true, expected: 'hello' },
@@ -43,6 +47,7 @@ export const EXERCISES: Exercise[] = [
     title: 'Find any digit',
     level: 'beginner',
     description: 'Match a single digit (0–9).',
+    metaDescription: String.raw`Match a single digit with the \d shorthand character class, the regular expression equivalent of the range [0-9], and watch it light up in the text.`,
     testCases: [
       { text: 'abc 7 def', shouldMatch: true, expected: '7' },
       { text: 'order #42', shouldMatch: true, expected: '4' },
@@ -61,6 +66,8 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Match a sequence of exactly three digits. Useful for area codes, for example.',
+    metaDescription:
+      'Ask for an exact repetition count with the {3} quantifier, so the pattern matches three consecutive digits such as an area code and nothing shorter.',
     testCases: [
       { text: 'call 415 now', shouldMatch: true, expected: '415' },
       { text: '12 trees and 345 birds', shouldMatch: true, expected: '345' },
@@ -79,6 +86,7 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Make sure your regex only matches the word "cat" on its own — not as part of a longer word like "category" or "scatter".',
+    metaDescription: String.raw`Use the \b word boundary so the pattern matches the standalone word cat and rejects it inside a longer word such as category or scatter.`,
     testCases: [
       { text: 'the cat sleeps', shouldMatch: true, expected: 'cat' },
       { text: 'category list', shouldMatch: false },
@@ -98,6 +106,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Match a simple email of the form user@domain.tld. You can stay with letters, digits, dots, hyphens and underscores.',
+    metaDescription:
+      'Build a simple email pattern out of character classes and quantifiers, matching user@domain.tld while leaving an address broken by a space unmatched.',
     testCases: [
       {
         text: 'contact me at foo@bar.com',
@@ -126,6 +136,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Match a date in YYYY-MM-DD format. You do not need to validate that the date is real — just the shape.',
+    metaDescription:
+      'Match an ISO date written YYYY-MM-DD using counted digit quantifiers, checking the shape of the date rather than whether the calendar day exists.',
     testCases: [
       {
         text: 'on 2024-01-31 we shipped',
@@ -154,6 +166,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Match a CSS hex colour like #1e3a8a or #fff. It always starts with # followed by exactly 3 or 6 hex digits.',
+    metaDescription:
+      'Match a CSS hex colour such as #1e3a8a or #fff with a hexadecimal character class, alternation, and a word boundary that stops a partial match.',
     testCases: [
       {
         text: 'background #1e3a8a is nice',
@@ -179,6 +193,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Use a capturing group to capture only the name in greetings like "Hello, Alice!". The full match must be the whole greeting (so a plain "Hi Alice!" is rejected), and group 1 must contain just the name.',
+    metaDescription:
+      'Put parentheses around part of a pattern so the whole greeting still matches while capture group 1 holds only the name, and Hi Alice is rejected.',
     testCases: [
       {
         text: 'Hello, Alice!',
@@ -208,6 +224,8 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Match the number, but only when it is followed by " USD". The match must contain only the digits, not the currency.',
+    metaDescription:
+      'Use the positive lookahead (?= USD) to match a number only when that currency follows it, keeping the digits inside the match and the currency out.',
     testCases: [
       { text: 'total 42 USD', shouldMatch: true, expected: '42' },
       { text: '1000 USD please', shouldMatch: true, expected: '1000' },
@@ -227,6 +245,8 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Match any word that is immediately repeated — for instance "the the" or "The THE". Use a backreference so you do not have to hardcode the word, and make the match case-insensitive so different casings still count as a repetition.',
+    metaDescription:
+      'Catch a word repeated twice in a row with a backreference to a capture group, and add the i flag so that the the and The THE both count.',
     testCases: [
       {
         text: 'this is the the test',
@@ -264,6 +284,8 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Replace every digit in the text with a "#" character. Be sure to replace all of them, not just the first one.',
+    metaDescription:
+      'Redact every digit of a text with String.replace, and find out why a regular expression needs the g flag to reach past its very first match.',
     solutionFlags: ['g'],
     testCases: [
       { text: 'Room 42, floor 7', expected: 'Room ##, floor #' },
@@ -285,6 +307,7 @@ export const EXERCISES: Exercise[] = [
     level: 'beginner',
     description:
       'Turn any run of one-or-more whitespace characters into a single space. Tabs and multiple spaces should all become exactly one space.',
+    metaDescription: String.raw`Collapse every run of spaces, tabs and newlines into one space by pairing the \s whitespace class with a greedy + quantifier and the g flag.`,
     solutionFlags: ['g'],
     testCases: [
       { text: 'hello   world', expected: 'hello world' },
@@ -306,6 +329,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Reformat full names from "First Last" to "Last, First" using two capturing groups and backreferences in the replacement.',
+    metaDescription:
+      'Reorder First Last into Last, First by capturing each name in its own group and referring to the two of them as $1 and $2 in the replacement.',
     testCases: [
       { text: 'Marie Curie', expected: 'Curie, Marie' },
       { text: 'Alan Turing', expected: 'Turing, Alan' },
@@ -325,6 +350,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Convert ISO dates (YYYY-MM-DD) into European-style DD/MM/YYYY using three capturing groups.',
+    metaDescription:
+      'Turn an ISO date YYYY-MM-DD into a European DD/MM/YYYY with three capture groups reordered as $3/$2/$1 in the replacement string.',
     solutionFlags: ['g'],
     testCases: [
       { text: '2024-01-31', expected: '31/01/2024' },
@@ -349,6 +376,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Remove any trailing spaces or tabs at the end of each line, without touching blank lines that are already empty.',
+    metaDescription:
+      'Strip the trailing spaces and tabs of every line with the $ anchor and the m flag, leaving the lines that are already empty untouched.',
     solutionFlags: ['g', 'm'],
     testCases: [
       { text: 'hello   \nworld\t', expected: 'hello\nworld' },
@@ -370,6 +399,8 @@ export const EXERCISES: Exercise[] = [
     level: 'intermediate',
     description:
       'Surround every email address in the text with angle brackets. Use $& in the replacement to refer to the whole match.',
+    metaDescription:
+      'Wrap every email address in angle brackets using $& in the replacement string, the token that stands for whatever the whole match turned out to be.',
     solutionFlags: ['g'],
     testCases: [
       {
@@ -401,6 +432,8 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Same as the date-reformat exercise, but use named capturing groups and refer to them in the replacement with $<name> syntax.',
+    metaDescription:
+      'Name your capture groups (?<year>…) and reorder a date with the $<name> replacement syntax, which reads far better than $1, $2 and $3.',
     testCases: [
       { text: '2024-01-31', expected: '31/01/2024' },
       {
@@ -428,6 +461,8 @@ export const EXERCISES: Exercise[] = [
     level: 'advanced',
     description:
       'Remove every HTML tag, keeping only the surrounding text. Match the smallest possible tag — beware of greedy quantifiers across multiple tags.',
+    metaDescription:
+      'Remove every HTML tag and keep the text between them, learning why a greedy .* swallows several tags at once where a negated class does not.',
     solutionFlags: ['g'],
     testCases: [
       {

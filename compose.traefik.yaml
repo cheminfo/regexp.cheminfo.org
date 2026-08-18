@@ -10,7 +10,8 @@ services:
     image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
     environment:
-      SERVER_PORT: ${PORT:-10801}
+      SERVER_PORT: ${PORT:-10604}
+      BASE_PATH: ${BASE_PATH:-/}
       TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
     init: true
     restart: unless-stopped
@@ -43,7 +44,7 @@ services:
       - 'traefik.http.routers.regexp-cheminfo-org.entrypoints=websecure'
       - 'traefik.http.routers.regexp-cheminfo-org.tls=true'
       - 'traefik.http.routers.regexp-cheminfo-org.tls.certresolver=letsencrypt'
-      - 'traefik.http.services.regexp-cheminfo-org.loadbalancer.server.port=${PORT:-10801}'
+      - 'traefik.http.services.regexp-cheminfo-org.loadbalancer.server.port=${PORT:-10604}'
 
 networks:
   traefik:

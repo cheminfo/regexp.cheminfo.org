@@ -1,19 +1,36 @@
 import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
-import { EcosystemButton, EcosystemLinks } from 'react-cheminfo/ui';
+import { startDocumentMeta } from 'react-cheminfo/core';
+import { EcosystemButton, SiteFooter, SiteHeader } from 'react-cheminfo/ui';
 
-import { BrandMark, Wordmark } from './components/Brand.tsx';
 import { About } from './pages/About.tsx';
 import { Cheatsheet } from './pages/Cheatsheet.tsx';
 import { Exercises } from './pages/Exercises.tsx';
 import { Glossary } from './pages/Glossary.tsx';
 import { Playground } from './pages/Playground.tsx';
 import { Tutorial } from './pages/Tutorial.tsx';
-import { writeDocumentMeta } from './state/documentMeta.ts';
 import type { Page } from './state/router.ts';
 import { PAGES, parsePath, routePath } from './state/router.ts';
+import { PAGE_ROUTES } from './state/routes.ts';
+import { absoluteUrl, pathWithoutBase, withBase } from './state/site.ts';
 
 const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
+
+/**
+ * Keep the tab and the canonical address in step with the page on screen. The
+ * build already titles each file it wrote; this is what a move inside the app
+ * changes, and what a crawler rendering the page reads afterwards. The origin
+ * and the mount come from the page rather than from the build, so a deployment
+ * serving this build under another address still describes itself.
+ */
+function syncDocumentMeta(): void {
+  startDocumentMeta({
+    site: 'regexp',
+    routes: PAGE_ROUTES,
+    url: () => pathWithoutBase(globalThis.location.pathname),
+    origin: absoluteUrl(''),
+  });
+}
 
 /**
  * Root application component. Hosts a path-based router that swaps between the
@@ -22,18 +39,18 @@ const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
  */
 export function App() {
   const [route, setRoute] = useState<Page>(
-    () => parsePath(globalThis.location.pathname).page,
+    () => parsePath(pathWithoutBase(globalThis.location.pathname)).page,
   );
 
   useEffect(() => {
     // Also on mount: the build titles each file it wrote, but a page reached
     // through the SPA fallback — every address in dev, an unprerendered one in
     // production — otherwise keeps the title of the file that answered.
-    writeDocumentMeta();
+    syncDocumentMeta();
 
     function onPopState() {
-      setRoute(parsePath(globalThis.location.pathname).page);
-      writeDocumentMeta();
+      setRoute(parsePath(pathWithoutBase(globalThis.location.pathname)).page);
+      syncDocumentMeta();
     }
     globalThis.addEventListener('popstate', onPopState);
     return () => {
@@ -49,40 +66,25 @@ export function App() {
         target = routePath({ page, exerciseId: lastExercise });
       }
     }
-    globalThis.history.pushState(null, '', target);
+    globalThis.history.pushState(null, '', withBase(target));
     setRoute(page);
-    writeDocumentMeta();
+    syncDocumentMeta();
   }, []);
 
   return (
     <div className="app-shell">
-      <header className="app-header no-print">
-        <div className="app-header__inner">
-          <a href="/tutorial" className="brand" title="regexp.cheminfo.org">
-            <BrandMark />
-            <Wordmark />
-          </a>
-          <nav className="app-header-nav">
-            {PAGES.map((page) => (
-              <a
-                key={page.id}
-                href={routePath({ page: page.id })}
-                className={
-                  page.id === route ? 'nav-link nav-link--active' : 'nav-link'
-                }
-                onClick={(event) => {
-                  // A real link, so a crawler walks the site and a middle click
-                  // opens a tab; the plain click is the one taken over.
-                  if (event.metaKey || event.ctrlKey || event.shiftKey) return;
-                  event.preventDefault();
-                  handleTabChange(page.id);
-                }}
-              >
-                {page.label}
-              </a>
-            ))}
-          </nav>
-          <div className="app-header-actions">
+      <SiteHeader
+        siteId="regexp"
+        homeHref={withBase('/tutorial')}
+        activeId={route}
+        nav={PAGES.map((page) => ({
+          id: page.id,
+          label: page.label,
+          href: routePath({ page: page.id }),
+          onSelect: () => handleTabChange(page.id),
+        }))}
+        actions={
+          <>
             <a
               href="https://forms.gle/YWQZs7fntJBuv5xM6"
               target="_blank"
@@ -123,9 +125,9 @@ export function App() {
               </svg>
             </a>
             <EcosystemButton currentSiteId="regexp" />
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <main className="app-main">
         {route === 'tutorial' && <Tutorial />}
@@ -136,11 +138,7 @@ export function App() {
         {route === 'about' && <About />}
       </main>
 
-      <footer className="app-footer no-print">
-        <div className="app-footer__inner">
-          <EcosystemLinks currentSiteId="regexp" />
-        </div>
-      </footer>
+      <SiteFooter siteId="regexp" />
     </div>
   );
 }

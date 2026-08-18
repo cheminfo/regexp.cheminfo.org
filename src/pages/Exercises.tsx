@@ -23,13 +23,16 @@ import { compileRegex } from '../regex/compile.ts';
 import type { TestCaseResult } from '../regex/validate.ts';
 import { validateExercise } from '../regex/validate.ts';
 import { parsePath, routePath } from '../state/router.ts';
+import { pathWithoutBase, withBase } from '../state/site.ts';
 import type { Exercise, ExerciseState } from '../types.ts';
 
 const STORAGE_KEY = 'regexp-cheminfo:exercise-state:v1';
 const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
 
 function readExerciseIdFromAddress(): string | null {
-  const { exerciseId } = parsePath(globalThis.location.pathname);
+  const { exerciseId } = parsePath(
+    pathWithoutBase(globalThis.location.pathname),
+  );
   if (!exerciseId) return null;
   return EXERCISES.some((ex) => ex.id === exerciseId) ? exerciseId : null;
 }
@@ -140,7 +143,7 @@ export function Exercises() {
     globalThis.history.pushState(
       null,
       '',
-      routePath({ page: 'exercises', exerciseId: id }),
+      withBase(routePath({ page: 'exercises', exerciseId: id })),
     );
   }, []);
 

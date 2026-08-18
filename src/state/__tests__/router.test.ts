@@ -1,8 +1,9 @@
+import { pageMetaFor } from 'react-cheminfo/core';
 import { expect, test } from 'vitest';
 
 import { EXERCISES } from '../../data/exercises.ts';
-import { everyPage, pageMetaFor } from '../pageMeta.ts';
 import { PAGES, parsePath, pathFromLegacyHash, routePath } from '../router.ts';
+import { PAGE_ROUTES } from '../routes.ts';
 
 test('every page of the header is an address of its own', () => {
   const paths = PAGES.map((page) => routePath({ page: page.id }));
@@ -57,28 +58,30 @@ test('a malformed escape in a link does not throw the page away', () => {
 });
 
 test('every page is titled and described on its own', () => {
-  const pages = everyPage();
+  const pages = PAGE_ROUTES;
 
   expect(pages).toHaveLength(PAGES.length + EXERCISES.length);
   expect(new Set(pages.map((page) => page.title)).size).toBe(pages.length);
-  expect(new Set(pages.map((page) => page.canonicalPath)).size).toBe(
+  expect(new Set(pages.map((page) => page.description)).size).toBe(
     pages.length,
   );
+  expect(new Set(pages.map((page) => page.path)).size).toBe(pages.length);
 
   for (const page of pages) {
-    expect(page.description.length).toBeGreaterThan(60);
+    // The site name is appended after the title, and a description is cut off
+    // mid-sentence past 160 characters.
+    expect(page.title.length).toBeLessThan(60);
+    expect(page.description.length).toBeGreaterThanOrEqual(110);
+    expect(page.description.length).toBeLessThanOrEqual(160);
   }
 });
 
 test('an exercise is described by what it asks for, without the markers', () => {
-  const meta = pageMetaFor({
-    page: 'exercises',
-    exerciseId: 'word-boundary-cat',
-  });
+  const meta = pageMetaFor(PAGE_ROUTES, '/exercises/word-boundary-cat');
 
   expect(meta.title).toBe(
-    'Match the word "cat" but not "category" — regular expression exercise',
+    'Match the word "cat" but not "category" — regex exercise',
   );
   expect(meta.description).not.toContain('[[');
-  expect(meta.canonicalPath).toBe('/exercises/word-boundary-cat');
+  expect(meta.path).toBe('/exercises/word-boundary-cat');
 });

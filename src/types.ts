@@ -90,6 +90,16 @@ interface BaseExercise {
   title: string;
   level: ExerciseLevel;
   description: string;
+  /**
+   * The sentence this exercise is indexed under, at its own address: one
+   * sentence of 110 to 160 characters, in plain prose, naming the construct a
+   * learner would type into a search engine.
+   *
+   * Separate from `description`, which teaches on the page — it is several
+   * sentences long, addresses the student directly and carries `[[term]]`
+   * glossary markers, none of which belongs in a search result.
+   */
+  metaDescription: string;
   hints: string[];
   /** Sample pattern shown only when the student reveals the solution. */
   solution: string;

@@ -1,3 +1,5 @@
+import { withBase } from './site.ts';
+
 export type Page =
   'tutorial' | 'playground' | 'exercises' | 'cheatsheet' | 'glossary' | 'about';
 
@@ -60,7 +62,7 @@ export function routePath(route: Route): string {
  */
 export function adoptLegacyHashAddress(): void {
   const path = pathFromLegacyHash(globalThis.location?.hash ?? '');
-  if (path) globalThis.history.replaceState(null, '', path);
+  if (path) globalThis.history.replaceState(null, '', withBase(path));
 }
 
 /**

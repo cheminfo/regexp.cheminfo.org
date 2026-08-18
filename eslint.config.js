@@ -13,6 +13,12 @@ export default defineConfig(
   ]),
   ...cheminfoTs,
   {
+    // A build step runs in node, and reads the address of the deployment from
+    // the environment it was started in.
+    files: ['scripts/**'],
+    languageOptions: { globals: { process: 'readonly' } },
+  },
+  {
     files: ['src/**/*.{ts,tsx}'],
     extends: cheminfoReact,
   },

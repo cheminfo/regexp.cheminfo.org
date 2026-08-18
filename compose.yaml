@@ -9,10 +9,11 @@ services:
     image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
     environment:
-      SERVER_PORT: ${PORT:-10801}
+      SERVER_PORT: ${PORT:-10604}
+      BASE_PATH: ${BASE_PATH:-/}
       TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
     ports:
-      - '${PORT:-10801}:${PORT:-10801}'
+      - '${PORT:-10604}:${PORT:-10604}'
     init: true
     restart: unless-stopped
     stop_grace_period: 30s

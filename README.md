@@ -62,9 +62,10 @@ npm install
 npm run dev
 ```
 
-Then open `http://localhost:10802`. The dev server port is `PORT + 1`,
-so the single derived `PORT` (10801, from the project creation date)
-drives both the container and the dev server. Override with `VITE_PORT`.
+Then open `http://localhost:10605`. The dev server port is `PORT + 1`,
+so the single derived `PORT` (10604, from 2026-06-04 — the creation date's own
+number was already taken by a sibling site) drives both the container and the
+dev server. Override with `VITE_PORT`.
 
 ## Tests, lint and type checks
 
@@ -108,7 +109,7 @@ With no `COMPOSE_FILE` uncommented, `docker compose` uses `compose.yaml`.
 
 ### Port mode (`compose.yaml`)
 
-Publishes the static site on `PORT` (default 10801), which is also the
+Publishes the static site on `PORT` (default 10604), which is also the
 port the container serves on.
 
 ### Traefik (`compose.traefik.yaml`)
@@ -127,7 +128,7 @@ No host port is published.
    Cloudflared connector_.
 2. Copy the connector token into `.env` as `TUNNEL_TOKEN=...`.
 3. Open the tunnel, **Published applications** tab, add an application
-   with `Service = HTTP`, URL `regexp-cheminfo-org:10801`, hostname
+   with `Service = HTTP`, URL `regexp-cheminfo-org:10604`, hostname
    `regexp.lactame.com`.
 
 ## Deploy and rollback
@@ -144,15 +145,34 @@ immutable tag that stays reachable for a rollback, and both variables are
 declared in `.env.example`. The script rewrites `IMAGE_TAG` in `.env` and keeps
 its per-host state in `.deploy/`, which is gitignored.
 
+## Where the site is served
+
+The site does not assume it owns the root of a host. `SITE_URL` is read **at
+build time** and carries the origin and the path together; its path half is
+what every asset, route, canonical link, social card and sitemap entry is
+written under, so putting the tool under a path is one variable and no code
+change:
+
+```sh
+SITE_URL=https://example.org/regexp/ npm run build
+docker build --build-arg SITE_URL=https://example.org/regexp/ .
+```
+
+Left unset it is `https://regexp.cheminfo.org/` — its own host, at the root of it — which is what
+every deployment does today. Note that a crawler only reads `robots.txt` from
+the root of a host, so a site mounted under a path is covered by whatever
+answers that root, not by the file the build writes.
+
 ## Environment variables
 
-| Name           | Description                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------- |
-| `COMPOSE_FILE` | Deployment mode: `compose.yaml` (default), `compose.traefik.yaml`, `compose.cloudflared.yaml`. |
-| `PORT`         | Port the container serves on, and publishes in port mode. Defaults to 10801.                   |
-| `IMAGE_NAME`   | Image selected by every compose file. Defaults to `ghcr.io/cheminfo/regexp.cheminfo.org`.      |
-| `IMAGE_TAG`    | Tag deployed. Rewritten by the server's deploy script — do not edit by hand.                   |
-| `TUNNEL_TOKEN` | Cloudflare Tunnel token (cloudflared deployment only).                                         |
+| Name           | Description                                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `SITE_URL`     | Build time only: where the site will be served, origin and mount path together. Unset, `https://regexp.cheminfo.org/`. |
+| `COMPOSE_FILE` | Deployment mode: `compose.yaml` (default), `compose.traefik.yaml`, `compose.cloudflared.yaml`.                         |
+| `PORT`         | Port the container serves on, and publishes in port mode. Defaults to 10604.                                           |
+| `IMAGE_NAME`   | Image selected by every compose file. Defaults to `ghcr.io/cheminfo/regexp.cheminfo.org`.                              |
+| `IMAGE_TAG`    | Tag deployed. Rewritten by the server's deploy script — do not edit by hand.                                           |
+| `TUNNEL_TOKEN` | Cloudflare Tunnel token (cloudflared deployment only).                                                                 |
 
 ## Changelog
 

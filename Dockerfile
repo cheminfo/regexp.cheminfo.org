@@ -3,6 +3,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+
+# Where the built site will be served, origin and path together. Left unset it
+# is this site's own host at the root of it; a deployment putting the tool
+# under a path — one of several on a shared host — passes that address here and
+# every asset, route, canonical and sitemap entry is written under it:
+#   docker build --build-arg SITE_URL=https://example.org/regexp/ .
+ARG SITE_URL=
+ENV SITE_URL=$SITE_URL
+
 RUN npm run build
 
 FROM joseluisq/static-web-server:2-alpine
@@ -17,8 +26,8 @@ ENV SERVER_FALLBACK_PAGE=/public/index.html
 # Without this, static-web-server 308s it to `/tutorial/` — an address the
 # sitemap, the internal links and the page's own canonical never use.
 ENV SERVER_REDIRECT_TRAILING_SLASH=false
-ENV SERVER_PORT=10801
-EXPOSE 10801
+ENV SERVER_PORT=10604
+EXPOSE 10604
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/usr/local/bin/static-web-server"]

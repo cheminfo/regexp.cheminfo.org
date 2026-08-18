@@ -1,81 +1,29 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Where this deployment is mounted. The build itself carries no mount —
+         its assets are relative — so this is what resolves them, and what the
+         page reads its own mount back off. The container rewrites it from
+         BASE_PATH when it starts, which is how one image serves both this
+         site's own host and a path of a shared one. It has to come before
+         anything it resolves. -->
+    <base href="/" />
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1e3a8a" />
-    <!-- The title, the description, the canonical address and the social card
-         are written per page by `scripts/prerender.js`; these are what the
-         build carries before it runs. -->
-    <title>Learn regular expressions — a live, guided tutorial</title>
-    <meta
-      name="description"
-      content="Learn regular expressions step by step in a live playground: literals, character classes, quantifiers, anchors, groups, lookaround and search-and-replace, each one editable as you read it."
-    />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "regexp.cheminfo.org",
-        "url": "https://regexp.cheminfo.org/",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Any",
-        "browserRequirements": "Requires JavaScript",
-        "description": "Learn regular expressions in a live playground: a guided tutorial, graded exercises checked against test cases, a printable cheatsheet and a glossary.",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-        "isAccessibleForFree": true,
-        "publisher": { "@type": "Organization", "name": "cheminfo" }
-      }
-    </script>
+    <!-- The title, the description, the canonical address, the social card and
+         the structured data are written here, per address, by react-cheminfo's
+         prerender plugin. The page carries none of its own, so there is nothing
+         to duplicate and nothing to take back out. -->
+    <!--cheminfo:head-->
   </head>
   <body>
     <div id="root"></div>
-    <noscript>
-      <h1>regexp.cheminfo.org — learn regular expressions</h1>
-      <p>
-        A guided tutorial, a live playground, graded exercises checked against
-        test cases, a printable cheatsheet and a glossary. The tool needs
-        JavaScript, because the regular expressions run in your browser.
-      </p>
-      <ul>
-        <li><a href="/">Tutorial — the notation, one step at a time</a></li>
-        <li><a href="/playground">Playground — test a pattern live</a></li>
-        <li><a href="/exercises">Exercises — write the pattern yourself</a></li>
-        <li>
-          <a href="/cheatsheet">Cheatsheet — every construct in a table</a>
-        </li>
-        <li>
-          <a href="/glossary">Glossary — the words they are explained in</a>
-        </li>
-        <li><a href="/about">About, and what to cite</a></li>
-      </ul>
-      <h2>Our other tools</h2>
-      <ul>
-        <li><a href="https://inchi.cheminfo.org/">inchi.cheminfo.org</a></li>
-        <li><a href="https://vcl.cheminfo.org/">vcl.cheminfo.org</a></li>
-        <li><a href="https://smiles.cheminfo.org/">smiles.cheminfo.org</a></li>
-        <li><a href="https://www.chemcalc.org/">www.chemcalc.org</a></li>
-        <li><a href="https://www.nmrium.org/">www.nmrium.org</a></li>
-        <li><a href="https://surge.cheminfo.org/">surge.cheminfo.org</a></li>
-        <li><a href="https://tex.cheminfo.org/">tex.cheminfo.org</a></li>
-        <li><a href="https://lcao.cheminfo.org/">lcao.cheminfo.org</a></li>
-        <li><a href="https://pdb.cheminfo.org/">pdb.cheminfo.org</a></li>
-        <li>
-          <a href="https://elucidation.cheminfo.org/"
-            >elucidation.cheminfo.org</a
-          >
-        </li>
-        <li>
-          <a href="https://equilibrium.cheminfo.org/"
-            >equilibrium.cheminfo.org</a
-          >
-        </li>
-        <li>
-          <a href="https://polycarp.cheminfo.org/">polycarp.cheminfo.org</a>
-        </li>
-      </ul>
-    </noscript>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- The crawl path a visitor with no JavaScript reads: the same plugin
+         writes it, with addresses relative to the <base> above so one image
+         serves the site's own host and a path of a shared one alike. -->
+    <!--cheminfo:body-->
   </body>
 </html>
