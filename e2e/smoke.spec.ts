@@ -86,7 +86,9 @@ test('About page shows EPFL credit and grep / sed / Python snippets', async ({
   await expect(
     page.getByText(/This website is provided by Luc Patiny from/),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: 'EPFL' })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'EPFL', exact: true }),
+  ).toBeVisible();
 
   await expect(page.getByText(/grep -rnE/)).toBeVisible();
   await expect(page.getByText(/sed -E -i/)).toBeVisible();
