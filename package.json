@@ -1,6 +1,6 @@
 {
   "name": "regexp-cheminfo-org",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Interactive pedagogic tool to learn regular expressions with live testing and exercises.",
   "type": "module",
   "private": true,
