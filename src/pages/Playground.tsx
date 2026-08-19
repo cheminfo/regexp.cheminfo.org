@@ -150,7 +150,7 @@ export function Playground() {
                     margin: 0,
                     padding: 10,
                     background: '#f5f8fa',
-                    border: '1px solid #d3d8de',
+                    border: '1px solid var(--border, #d3d8de)',
                     borderRadius: 3,
                     fontFamily: 'var(--font-mono)',
                     fontSize: 13,

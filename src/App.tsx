@@ -6,6 +6,7 @@ import {
   NavLink,
   SiteFooter,
   SiteHeader,
+  SiteTheme,
 } from 'react-cheminfo/ui';
 
 import { About } from './pages/About.tsx';
@@ -78,6 +79,7 @@ export function App() {
 
   return (
     <div className="app-shell">
+      <SiteTheme siteId="regexp" />
       <SiteHeader
         siteId="regexp"
         homeHref={withBase('/tutorial')}
