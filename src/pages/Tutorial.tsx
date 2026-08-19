@@ -1,6 +1,4 @@
 import {
-  Button,
-  ButtonGroup,
   Callout,
   Card,
   FormGroup,
@@ -11,6 +9,7 @@ import {
   Tooltip,
 } from '@blueprintjs/core';
 import { useMemo, useState } from 'react';
+import { TutorialStepStrip } from 'react-cheminfo/ui';
 
 import {
   GlossaryDescription,
@@ -23,7 +22,7 @@ import { RegexInput } from '../components/RegexInput.tsx';
 import type { TutorialStep } from '../data/tutorial.ts';
 import {
   TRY_IT_HELP,
-  TUTORIAL_LEVELS,
+  TUTORIAL_LEVEL_LABELS,
   TUTORIAL_STEPS,
 } from '../data/tutorial.ts';
 import { applyReplace, compileRegex, findMatches } from '../regex/compile.ts';
@@ -89,68 +88,13 @@ export function Tutorial() {
           experiment. Hover the underlined terms in the explanation for
           examples.
         </p>
-        <div className="tutorial-levels">
-          {TUTORIAL_LEVELS.map((meta) => {
-            const stepsForLevel = TUTORIAL_STEPS.map((step, idx) => ({
-              step,
-              idx,
-            })).filter(({ step }) => step.level === meta.level);
-            return (
-              <div
-                key={meta.level}
-                className="tutorial-level"
-                style={{ background: meta.background }}
-              >
-                <span className="tutorial-level-label">{meta.label}</span>
-                <div className="tutorial-level-buttons">
-                  {stepsForLevel.map(({ step, idx }) => {
-                    const isActive = idx === stepIndex;
-                    return (
-                      <Button
-                        key={step.title}
-                        size="small"
-                        onClick={() => {
-                          goToStep(idx);
-                        }}
-                        title={step.title}
-                        style={{
-                          background: isActive
-                            ? meta.activeBackground
-                            : 'white',
-                          fontWeight: isActive ? 700 : 500,
-                          border: isActive
-                            ? '1px solid #5c7080'
-                            : '1px solid #d3d8de',
-                        }}
-                        text={String(idx + 1)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
         <div style={{ marginTop: 12 }}>
-          <ButtonGroup>
-            <Button
-              icon="arrow-left"
-              onClick={() => {
-                goToStep(stepIndex - 1);
-              }}
-              disabled={stepIndex === 0}
-              text="Previous"
-            />
-            <Button
-              endIcon="arrow-right"
-              intent="primary"
-              onClick={() => {
-                goToStep(stepIndex + 1);
-              }}
-              disabled={stepIndex >= TUTORIAL_STEPS.length - 1}
-              text="Next"
-            />
-          </ButtonGroup>
+          <TutorialStepStrip
+            steps={TUTORIAL_STEPS}
+            activeIndex={stepIndex}
+            onSelect={goToStep}
+            levelLabels={TUTORIAL_LEVEL_LABELS}
+          />
         </div>
       </Card>
 

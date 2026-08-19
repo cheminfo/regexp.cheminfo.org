@@ -574,48 +574,6 @@ body,
   padding: 1px 5px;
 }
 
-.tutorial-levels {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.tutorial-level {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  border-radius: 4px;
-}
-
-.tutorial-level-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #1b2a32;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  width: 170px;
-  flex-shrink: 0;
-}
-
-.tutorial-level-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.tutorial-level-buttons .bp6-button {
-  width: 32px;
-  padding: 2px 0 !important;
-  justify-content: center;
-  text-align: center;
-}
-
-.tutorial-level-buttons .bp6-button .bp6-button-text {
-  flex: none;
-  text-align: center;
-}
-
 .match-details {
   display: flex;
   flex-direction: column;
