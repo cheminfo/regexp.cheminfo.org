@@ -49,7 +49,7 @@ test('all six tabs render their main heading without errors', async ({
     { name: 'Exercises', heading: /Progress/i },
     { name: 'Cheatsheet', heading: /Cheatsheet|Basics/i },
     { name: 'Glossary', heading: /Glossary|Look-?around|Quantifier/i },
-    { name: 'About', heading: /About this site/i },
+    { name: 'About', heading: /What you can do here/i },
   ];
 
   for (const tab of tabs) {
@@ -78,16 +78,19 @@ test('deep-link to Playground works on reload', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('About page shows EPFL credit and grep / sed / Python snippets', async ({
+test('About page credits EPFL, its dependencies and the grep / sed / Python notes', async ({
   page,
 }) => {
   await page.goto('/about');
 
   await expect(
-    page.getByText(/This website is provided by Luc Patiny from/),
+    page.getByText(/Luc Patiny writes and provides it, at EPFL/),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'EPFL', exact: true }),
+    page.getByRole('heading', { name: 'Built on', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Blueprint', exact: true }),
   ).toBeVisible();
 
   await expect(page.getByText(/grep -rnE/)).toBeVisible();

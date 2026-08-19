@@ -12,17 +12,27 @@ export interface Route {
   exerciseId?: string;
 }
 
-/** Every page, in the order the header lists them. */
+/**
+ * The pages the header lists on the left, in the order it lists them. About is
+ * not among them: it is about the site rather than a place in the tool, so it
+ * sits with the utilities on the right.
+ */
 export const PAGES: ReadonlyArray<{ id: Page; label: string }> = [
   { id: 'tutorial', label: 'Tutorial' },
   { id: 'playground', label: 'Playground' },
   { id: 'exercises', label: 'Exercises' },
   { id: 'cheatsheet', label: 'Cheatsheet' },
   { id: 'glossary', label: 'Glossary' },
-  { id: 'about', label: 'About' },
 ];
 
-const PAGE_IDS = new Set<string>(PAGES.map((page) => page.id));
+const PAGE_IDS: ReadonlySet<string> = new Set<Page>([
+  'tutorial',
+  'playground',
+  'exercises',
+  'cheatsheet',
+  'glossary',
+  'about',
+]);
 
 /**
  * Where the address points. Routing is path based through the History API, so

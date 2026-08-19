@@ -1,7 +1,12 @@
 import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
 import { startDocumentMeta } from 'react-cheminfo/core';
-import { EcosystemButton, SiteFooter, SiteHeader } from 'react-cheminfo/ui';
+import {
+  EcosystemButton,
+  NavLink,
+  SiteFooter,
+  SiteHeader,
+} from 'react-cheminfo/ui';
 
 import { About } from './pages/About.tsx';
 import { Cheatsheet } from './pages/Cheatsheet.tsx';
@@ -85,6 +90,15 @@ export function App() {
         }))}
         actions={
           <>
+            <NavLink
+              item={{
+                id: 'about',
+                label: 'About',
+                href: routePath({ page: 'about' }),
+                onSelect: () => handleTabChange('about'),
+              }}
+              active={route === 'about'}
+            />
             <a
               href="https://forms.gle/YWQZs7fntJBuv5xM6"
               target="_blank"

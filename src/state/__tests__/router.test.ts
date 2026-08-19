@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 
 import { EXERCISES } from '../../data/exercises.ts';
 import { PAGES, parsePath, pathFromLegacyHash, routePath } from '../router.ts';
-import { PAGE_ROUTES } from '../routes.ts';
+import { PAGE_ROUTES, SITE_PAGES } from '../routes.ts';
 
 test('every page of the header is an address of its own', () => {
   const paths = PAGES.map((page) => routePath({ page: page.id }));
@@ -14,8 +14,14 @@ test('every page of the header is an address of its own', () => {
     '/exercises',
     '/cheatsheet',
     '/glossary',
-    '/about',
   ]);
+});
+
+test('the About is an address of its own, next to the utilities', () => {
+  expect(PAGES.map((page) => page.id)).not.toContain('about');
+  expect(routePath({ page: 'about' })).toBe('/about');
+  expect(parsePath('/about')).toStrictEqual({ page: 'about' });
+  expect(SITE_PAGES.map((page) => page.path)).toContain('/about');
 });
 
 test('an address opens the page it names', () => {
@@ -60,7 +66,7 @@ test('a malformed escape in a link does not throw the page away', () => {
 test('every page is titled and described on its own', () => {
   const pages = PAGE_ROUTES;
 
-  expect(pages).toHaveLength(PAGES.length + EXERCISES.length);
+  expect(pages).toHaveLength(SITE_PAGES.length + EXERCISES.length);
   expect(new Set(pages.map((page) => page.title)).size).toBe(pages.length);
   expect(new Set(pages.map((page) => page.description)).size).toBe(
     pages.length,
