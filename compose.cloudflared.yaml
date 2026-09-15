@@ -14,6 +14,13 @@ services:
     # addressable for a rollback. Unset, this runs the released :latest image.
     image: ${IMAGE_NAME:-ghcr.io/cheminfo/regexp.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
+    # What the server's deploy script probes before it keeps a new container.
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://127.0.0.1:10604/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     environment:
       SERVER_PORT: ${PORT:-10604}
       BASE_PATH: ${BASE_PATH:-/}
@@ -42,7 +49,7 @@ services:
         max-file: '3'
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.9.0
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     init: true
     restart: unless-stopped

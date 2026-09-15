@@ -71,7 +71,7 @@ export const SITE_PAGES: readonly RouteMeta[] = [
     path: '/about',
     title: 'About this tool, and regex beyond JavaScript',
     description:
-      'What this regular expression tutorial is, who provides it, the cheminfo RegExp explorer it replaces, and how the patterns carry over to grep, sed and Python.',
+      'What this regular expression tutorial is, who provides it, where the patterns run, and how they carry over to grep, sed and Python.',
     short: 'About',
     note: 'and regex beyond JavaScript',
   },

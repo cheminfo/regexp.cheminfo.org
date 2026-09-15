@@ -58,7 +58,7 @@ test('opening Exercises restores the last active exercise from localStorage', as
   // a new address entry the same way, but the active id
   // is written to localStorage immediately.
   await page.goto('/exercises');
-  await page.getByRole('button', { name: /^Find any digit/i }).click();
+  await page.getByRole('button', { name: /Find any digit/i }).click();
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
@@ -70,7 +70,7 @@ test('opening Exercises restores the last active exercise from localStorage', as
         window.localStorage.getItem('regexp-cheminfo:active-exercise:v1'),
       ),
     )
-    .toBe('digit');
+    .toBe(JSON.stringify({ id: 'digit' }));
 
   // Navigate away and back via the Tab component — the deep link pushed by
   // handleTabChange now includes the active exercise id.
@@ -104,7 +104,7 @@ test('last active exercise survives a full page reload (localStorage)', async ({
 }) => {
   // Select "Find any digit" so localStorage records "digit" as active.
   await page.goto('/exercises');
-  await page.getByRole('button', { name: /^Find any digit/i }).click();
+  await page.getByRole('button', { name: /Find any digit/i }).click();
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
@@ -115,7 +115,7 @@ test('last active exercise survives a full page reload (localStorage)', async ({
         window.localStorage.getItem('regexp-cheminfo:active-exercise:v1'),
       ),
     )
-    .toBe('digit');
+    .toBe(JSON.stringify({ id: 'digit' }));
 
   // Reload directly on /exercises (no exercise id in the address) — the page
   // must restore "digit" from localStorage rather than defaulting to the

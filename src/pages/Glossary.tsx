@@ -1,7 +1,7 @@
-import { Button, Card, H4, H5 } from '@blueprintjs/core';
+import { Card, H4, H5 } from '@blueprintjs/core';
 import { useMemo, useState } from 'react';
+import type { GlossaryEntry } from 'react-cheminfo/core';
 
-import type { GlossaryEntry } from '../data/glossary.ts';
 import { GLOSSARY } from '../data/glossary.ts';
 
 interface GlossaryRow {
@@ -35,7 +35,7 @@ export function Glossary() {
       if (entry.summary.toLowerCase().includes(needle)) return true;
       return entry.examples.some(
         (example) =>
-          example.pattern.toLowerCase().includes(needle) ||
+          example.code.toLowerCase().includes(needle) ||
           (example.note ?? '').toLowerCase().includes(needle),
       );
     });
@@ -54,13 +54,6 @@ export function Glossary() {
           aria-label="Filter glossary terms"
           className="glossary-search bp6-input"
         />
-        <Button
-          icon="print"
-          intent="primary"
-          onClick={() => globalThis.print()}
-        >
-          Print
-        </Button>
       </div>
       <Card elevation={1} aria-label="Regular expression glossary">
         <H4>Glossary</H4>
@@ -93,12 +86,12 @@ function GlossaryCard({ entry }: { entry: GlossaryEntry }) {
       {entry.examples.length > 0 && (
         <ul className="glossary-card__examples">
           {entry.examples.map((example) => (
-            <li key={`${example.pattern}::${example.text ?? ''}`}>
-              <code>/{example.pattern}/</code>
-              {example.text !== undefined && (
+            <li key={`${example.code}::${example.input ?? ''}`}>
+              <code>{example.code}</code>
+              {example.input !== undefined && (
                 <>
                   {' on '}
-                  <code>{JSON.stringify(example.text)}</code>
+                  <code>{example.input}</code>
                 </>
               )}
               {example.note && (

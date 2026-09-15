@@ -1,3 +1,8 @@
+import {
+  createTabRouter,
+  pathFromLegacyHash as legacyHashPath,
+} from 'react-cheminfo/core';
+
 import { withBase } from './site.ts';
 
 export type Page =
@@ -25,29 +30,35 @@ export const PAGES: ReadonlyArray<{ id: Page; label: string }> = [
   { id: 'glossary', label: 'Glossary' },
 ];
 
-const PAGE_IDS: ReadonlySet<string> = new Set<Page>([
-  'tutorial',
-  'playground',
-  'exercises',
-  'cheatsheet',
-  'glossary',
-  'about',
-]);
+/**
+ * Routing is path based through the History API, so every page is an address a
+ * crawler can fetch and a teacher can hand out — a `#` is dropped by half the
+ * tools that pass links around, and the server never sees it.
+ *
+ * The mount path is not given here: the addresses this writes are the site's
+ * own, and `withBase` moves them under the mount at the one place they reach
+ * the browser.
+ */
+const ROUTER = createTabRouter<Page>({
+  home: 'tutorial',
+  tabs: [
+    'tutorial',
+    'playground',
+    { id: 'exercises', takesId: true },
+    'cheatsheet',
+    'glossary',
+    'about',
+  ],
+});
 
 /**
- * Where the address points. Routing is path based through the History API, so
- * every page is an address a crawler can fetch and a teacher can hand out — a
- * `#` is dropped by half the tools that pass links around, and the server never
- * sees it.
+ * Where the address points.
  * @param pathname - The path of the address, e.g. `/exercises/word-boundary`.
  * @returns The page it opens, and the exercise when it names one.
  */
 export function parsePath(pathname: string): Route {
-  const [, first, second] = pathname.split('/');
-  if (!first || !PAGE_IDS.has(first)) return { page: 'tutorial' };
-  const page = first as Page;
-  if (page !== 'exercises' || !second) return { page };
-  return { page, exerciseId: safeDecode(second) };
+  const { tab, id } = ROUTER.parse(pathname);
+  return id === null ? { page: tab } : { page: tab, exerciseId: id };
 }
 
 /**
@@ -58,11 +69,7 @@ export function parsePath(pathname: string): Route {
  * @returns The path, starting with a slash.
  */
 export function routePath(route: Route): string {
-  if (route.page === 'tutorial') return '/';
-  if (route.page === 'exercises' && route.exerciseId) {
-    return `/exercises/${encodeURIComponent(route.exerciseId)}`;
-  }
-  return `/${route.page}`;
+  return ROUTER.format({ tab: route.page, id: route.exerciseId ?? null });
 }
 
 /**
@@ -83,22 +90,9 @@ export function adoptLegacyHashAddress(): void {
  * @returns The path it means, or null when the fragment is not one of ours.
  */
 export function pathFromLegacyHash(hash: string): string | null {
-  const trimmed = hash.replace(/^#\/?/, '');
-  if (!trimmed) return null;
-  const [first, second] = trimmed.split('/');
-  if (!first || !PAGE_IDS.has(first)) return null;
-  return routePath({
-    page: first as Page,
-    exerciseId: second ? safeDecode(second) : undefined,
-  });
-}
-
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    // A malformed escape in a link somebody retyped: the raw text is closer to
-    // what they meant than throwing the page away.
-    return value;
-  }
+  const legacy = legacyHashPath(hash);
+  if (legacy === null) return null;
+  const [, first] = (legacy.split('?', 1)[0] ?? '').split('/', 2);
+  if (first === undefined || !ROUTER.isTab(first)) return null;
+  return routePath(parsePath(legacy));
 }

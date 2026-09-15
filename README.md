@@ -13,18 +13,9 @@ validation, and a complete cheatsheet.
 
 Live site: <https://regexp.cheminfo.org>
 
-## Replaces the cheminfo "RegExp explorer" visualizer
-
-This site is the modern, standalone replacement for the legacy "RegExp
-explorer" view embedded inside the cheminfo visualizer:
-
-- **Old (legacy visualizer view):**
-  <https://www.cheminfo.org/?viewURL=https%3A%2F%2Fcouch.cheminfo.org%2Fcheminfo-public%2F65f84b002399eb79ec0f8bf145113d71%2Fview.json&loadversion=true&fillsearch=RegExp+explorer>
-- **New (this site):** <https://regexp.cheminfo.org>
-
-It keeps the live tester and diagram from the original and adds a
-guided tutorial, an exercise module with hints and instant validation,
-and a printable cheatsheet — all built to the cheminfo
+A live regular expression tester with a railroad diagram, a guided
+tutorial, an exercise module with hints and instant validation, and a
+printable cheatsheet — all built to the cheminfo
 [ensure-string standards](https://github.com/cheminfo/ensure-string).
 
 ## Features

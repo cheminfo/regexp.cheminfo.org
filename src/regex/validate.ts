@@ -1,3 +1,6 @@
+import type { TestCaseResult, ValidationResult } from 'react-cheminfo/core';
+import { failedValidation, finishValidation } from 'react-cheminfo/core';
+
 import type {
   Exercise,
   MatchExercise,
@@ -8,29 +11,23 @@ import type {
 
 import { compileRegex } from './compile.ts';
 
-export interface MatchTestCaseResult {
+/** How one "does this text match?" case came out. */
+export interface MatchTestCaseResult extends TestCaseResult {
   kind: 'match';
   testCase: MatchTestCase;
-  passed: boolean;
-  reason: string;
-  actual: string | null;
 }
 
-export interface ReplaceTestCaseResult {
+/** How one "does this text rewrite to that?" case came out. */
+export interface ReplaceTestCaseResult extends TestCaseResult {
   kind: 'replace';
   testCase: ReplaceTestCase;
-  passed: boolean;
-  reason: string;
-  actual: string | null;
 }
 
-export type TestCaseResult = MatchTestCaseResult | ReplaceTestCaseResult;
+/** How one case of either kind came out. */
+export type ExerciseCaseResult = MatchTestCaseResult | ReplaceTestCaseResult;
 
-export interface ValidationResult {
-  passed: boolean;
-  error: string | null;
-  cases: TestCaseResult[];
-}
+/** The verdict on one attempt at an exercise. */
+export type ExerciseValidation = ValidationResult<ExerciseCaseResult>;
 
 /**
  * Run a student-provided regex (and optional replacement) against an exercise
@@ -47,37 +44,30 @@ export function validateExercise(
   pattern: string,
   flags: string,
   replacement = '',
-): ValidationResult {
+): ExerciseValidation {
   if (pattern === '') {
-    return {
-      passed: false,
-      error: 'The regex is empty — write something before validating.',
-      cases: emptyCases(exercise),
-    };
+    return failedValidation(
+      'The regex is empty — write something before validating.',
+      emptyCases(exercise),
+    );
   }
 
   const compiled = compileRegex(pattern, flags);
   if (compiled.error || !compiled.regex) {
-    return {
-      passed: false,
-      error: compiled.error ?? 'Invalid regex',
-      cases: emptyCases(exercise),
-    };
+    return failedValidation(
+      compiled.error ?? 'Invalid regex',
+      emptyCases(exercise),
+    );
   }
 
-  const cases =
+  return finishValidation<ExerciseCaseResult>(
     exercise.kind === 'replace'
       ? validateReplaceCases(exercise, compiled.regex, replacement)
-      : validateMatchCases(exercise, compiled.regex);
-
-  return {
-    passed: cases.every((c) => c.passed),
-    error: null,
-    cases,
-  };
+      : validateMatchCases(exercise, compiled.regex),
+  );
 }
 
-function emptyCases(exercise: Exercise): TestCaseResult[] {
+function emptyCases(exercise: Exercise): ExerciseCaseResult[] {
   if (exercise.kind === 'replace') {
     return exercise.testCases.map((testCase): ReplaceTestCaseResult => ({
       kind: 'replace',

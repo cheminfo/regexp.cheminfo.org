@@ -1,3 +1,8 @@
+import type { BaseExercise, ExerciseStatus } from 'react-cheminfo/core';
+import type { SyntaxTooltipExample } from 'react-cheminfo/ui';
+
+export type { ExerciseLevel, ExerciseStatus } from 'react-cheminfo/core';
+
 export type FlagKey = 'g' | 'i' | 'm' | 's' | 'u' | 'y';
 
 export interface FlagDescriptor {
@@ -8,11 +13,7 @@ export interface FlagDescriptor {
   /** Longer explanation of the behavior, shown below the headline. */
   detail: string;
   /** Concrete usage example: pattern, input, and what changes with the flag. */
-  example: {
-    pattern: string;
-    input: string;
-    note: string;
-  };
+  example: SyntaxTooltipExample;
   /** Name of the corresponding `RegExp` accessor property (e.g. `global`). */
   property: string;
 }
@@ -55,8 +56,6 @@ export interface MatchResult {
   matches: MatchInfo[];
 }
 
-export type ExerciseLevel = 'beginner' | 'intermediate' | 'advanced';
-
 export type ExerciseKind = 'match' | 'replace';
 
 export interface MatchTestCase {
@@ -85,11 +84,7 @@ export interface ReplaceTestCase {
   expected: string;
 }
 
-interface BaseExercise {
-  id: string;
-  title: string;
-  level: ExerciseLevel;
-  description: string;
+interface RegexExercise extends BaseExercise {
   /**
    * The sentence this exercise is indexed under, at its own address: one
    * sentence of 110 to 160 characters, in plain prose, naming the construct a
@@ -100,9 +95,6 @@ interface BaseExercise {
    * glossary markers, none of which belongs in a search result.
    */
   metaDescription: string;
-  hints: string[];
-  /** Sample pattern shown only when the student reveals the solution. */
-  solution: string;
   /**
    * Flags paired with `solution`, shown alongside the sample pattern when
    * the student reveals it. Not enforced by the validator — flag needs
@@ -112,12 +104,12 @@ interface BaseExercise {
   solutionFlags?: FlagKey[];
 }
 
-export interface MatchExercise extends BaseExercise {
+export interface MatchExercise extends RegexExercise {
   kind: 'match';
   testCases: MatchTestCase[];
 }
 
-export interface ReplaceExercise extends BaseExercise {
+export interface ReplaceExercise extends RegexExercise {
   kind: 'replace';
   testCases: ReplaceTestCase[];
   /** Sample replacement string paired with `solution`. */
@@ -125,8 +117,6 @@ export interface ReplaceExercise extends BaseExercise {
 }
 
 export type Exercise = MatchExercise | ReplaceExercise;
-
-export type ExerciseStatus = 'idle' | 'attempted' | 'solved';
 
 export interface ExerciseState {
   pattern: string;

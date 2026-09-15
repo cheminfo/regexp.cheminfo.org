@@ -1,9 +1,8 @@
-import { Button, InputGroup, Tooltip } from '@blueprintjs/core';
+import { Button, InputGroup } from '@blueprintjs/core';
+import { SyntaxTooltip } from 'react-cheminfo/ui';
 
 import { FLAGS } from '../data/flags.ts';
 import type { FlagKey } from '../types.ts';
-
-import { SyntaxTooltip } from './SyntaxTooltip.tsx';
 
 interface Props {
   pattern: string;
@@ -83,23 +82,18 @@ export function RegexInput({
         {FLAGS.map((flag) => {
           const active = flags.includes(flag.key);
           return (
-            <Tooltip
+            <SyntaxTooltip
               key={flag.key}
-              content={
-                <SyntaxTooltip
-                  content={{
-                    syntax: flag.key,
-                    name: flag.name,
-                    tag: `RegExp.prototype.${flag.property}`,
-                    summary: flag.description,
-                    detail: flag.detail,
-                    example: flag.example,
-                  }}
-                />
-              }
+              content={{
+                syntax: flag.key,
+                name: flag.name,
+                tag: `RegExp.prototype.${flag.property}`,
+                summary: flag.description,
+                detail: flag.detail,
+                example: flag.example,
+              }}
               placement="bottom"
-              hoverOpenDelay={150}
-              popoverClassName="syntax-tooltip-popover"
+              codeLabel="Pattern"
             >
               <Button
                 size="small"
@@ -110,7 +104,7 @@ export function RegexInput({
                 }}
                 text={`${flag.key} · ${flag.name}`}
               />
-            </Tooltip>
+            </SyntaxTooltip>
           );
         })}
       </div>

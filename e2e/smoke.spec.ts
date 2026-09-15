@@ -83,9 +83,12 @@ test('About page credits EPFL, its dependencies and the grep / sed / Python note
 }) => {
   await page.goto('/about');
 
+  const providedBy = page.locator('.about-provided-by');
   await expect(
-    page.getByText(/Luc Patiny writes and provides it, at EPFL/),
+    providedBy.getByRole('heading', { name: 'Provided by', exact: true }),
   ).toBeVisible();
+  await expect(providedBy.getByText('Luc Patiny')).toBeVisible();
+  await expect(providedBy.getByRole('img', { name: /EPFL/ })).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Built on', exact: true }),
   ).toBeVisible();

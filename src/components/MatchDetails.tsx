@@ -1,3 +1,5 @@
+import { pluralize } from 'react-cheminfo/core';
+
 import type { MatchInfo } from '../types.ts';
 
 interface Props {
@@ -28,7 +30,7 @@ export function MatchDetails({ matches }: Props) {
       ))}
       {overflow > 0 && (
         <div className="match-details-overflow">
-          … {overflow} more match{overflow === 1 ? '' : 'es'} not shown.
+          … {overflow} more {pluralize(overflow, 'match', 'matches')} not shown.
         </div>
       )}
     </div>

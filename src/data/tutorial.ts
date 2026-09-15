@@ -1,6 +1,4 @@
-import type { ExerciseLevel } from '../types.ts';
-
-import type { GlossaryEntry } from './glossary.ts';
+import type { ExerciseLevel, FlagKey } from '../types.ts';
 
 /**
  * One stop in the guided tour. The description may contain `[[term]]` markers
@@ -158,28 +156,37 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   },
 ];
 
+/** What the "Try it" panel explains about itself. */
+export interface TryItHelp {
+  title: string;
+  /** The explanation, one short paragraph. */
+  summary: string;
+  /** One line per flag the student can toggle from the input bar. */
+  flags: Array<{ key: FlagKey; note: string }>;
+}
+
 /**
  * Help shown when hovering the "Try it" panel header in the tutorial.
  */
-export const TRY_IT_HELP: GlossaryEntry = {
+export const TRY_IT_HELP: TryItHelp = {
   title: 'How to use the playground',
   summary:
     'Type a regex between the slashes, edit the flags on the right, and change the test text below. Matches refresh live in the panels on the right.',
-  examples: [
+  flags: [
     {
-      pattern: 'g',
+      key: 'g',
       note: 'Without the g flag, only the first match is found. Click the chips below to toggle flags.',
     },
     {
-      pattern: 'i',
+      key: 'i',
       note: 'Make the match case-insensitive — /cat/i matches "Cat", "CAT", etc.',
     },
     {
-      pattern: 'm',
+      key: 'm',
       note: 'Multiline: ^ and $ apply to each line of the test text instead of the whole string.',
     },
     {
-      pattern: 's',
+      key: 's',
       note: 'dotAll: . also matches newline characters.',
     },
   ],

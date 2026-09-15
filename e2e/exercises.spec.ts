@@ -19,7 +19,7 @@ test('solving the first exercise marks it as done and persists in localStorage',
   ).toBeVisible();
 
   // Progress starts at 0 / N solved.
-  await expect(page.getByText(/0 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/0 \/ \d+ solved/)).toBeVisible();
 
   // Type the solution.
   await page.getByLabel('Regular expression pattern').fill('hello');
@@ -29,7 +29,7 @@ test('solving the first exercise marks it as done and persists in localStorage',
   await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
 
   // Progress is incremented to 1 / N.
-  await expect(page.getByText(/1 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/1 \/ \d+ solved/)).toBeVisible();
 
   // localStorage now records the solved state.
   const stored = await page.evaluate(() =>
@@ -51,7 +51,7 @@ test('progress persists across a full page reload', async ({ page }) => {
 
   // Hard reload — the persisted state should still mark exercise 1 as solved.
   await page.reload();
-  await expect(page.getByText(/1 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/1 \/ \d+ solved/)).toBeVisible();
 });
 
 test('an invalid attempt is reported and not stored as solved', async ({
@@ -65,7 +65,7 @@ test('an invalid attempt is reported and not stored as solved', async ({
   await expect(page.getByText(/Not quite yet/i)).toBeVisible();
 
   // Progress is still at zero, no stored state for that exercise.
-  await expect(page.getByText(/0 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/0 \/ \d+ solved/)).toBeVisible();
 });
 
 test('revealed hints show the actual hint text, one click at a time', async ({
@@ -128,7 +128,7 @@ test('navigating to a different exercise loads its own persisted state', async (
   await expect(page.getByText(/Brilliant! Exercise solved\./)).toBeVisible();
 
   // Jump to exercise 3 ("digit") — its input must be empty (fresh state).
-  await page.getByRole('button', { name: /^Find any digit/i }).click();
+  await page.getByRole('button', { name: /Find any digit/i }).click();
   await expect(
     page.getByRole('heading', { name: /^Find any digit$/i }),
   ).toBeVisible();
@@ -148,7 +148,7 @@ test('navigating to a different exercise loads its own persisted state', async (
   await expect(page.getByLabel('Regular expression pattern')).toHaveValue(
     '\\d',
   );
-  await expect(page.getByText(/2 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/2 \/ \d+ solved/)).toBeVisible();
 
   // And the menu badge for both exercises must show the solved tick icon.
   const stored = await page.evaluate(() =>
@@ -171,10 +171,10 @@ test('"Clear all answers" wipes localStorage after confirmation', async ({
   // The confirmation Alert opens; confirm it.
   await page
     .locator('.bp6-alert')
-    .getByRole('button', { name: 'Clear all answers' })
+    .getByRole('button', { name: 'Clear everything' })
     .click();
 
-  await expect(page.getByText(/0 \/ \d+ exercises solved/)).toBeVisible();
+  await expect(page.getByText(/0 \/ \d+ solved/)).toBeVisible();
   const stored = await page.evaluate(() =>
     window.localStorage.getItem('regexp-cheminfo:exercise-state:v1'),
   );

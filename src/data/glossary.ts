@@ -1,43 +1,12 @@
-/**
- * A single example shown inside a glossary tooltip.
- */
-export interface GlossaryExample {
-  /** Regex snippet (without surrounding slashes). */
-  pattern: string;
-  /**
-   * Sample text the pattern is illustrated against. Omit when the example is
-   * about syntax only, not behavior.
-   * @default undefined
-   */
-  text?: string;
-  /**
-   * Short explanation of what the example demonstrates.
-   * @default undefined
-   */
-  note?: string;
-}
+import type { Glossary } from 'react-cheminfo/core';
 
-/**
- * Rich content rendered inside a Blueprint tooltip for a glossary term or
- * for the "Try it" help icon.
- */
-export interface GlossaryEntry {
-  title: string;
-  summary: string;
-  examples: GlossaryExample[];
-}
-
-/**
- * Keyed by the literal term used inside `[[...]]` markers in step descriptions.
- * Keys are lowercase; lookups should also lowercase the marker text.
- */
-export const GLOSSARY: Record<string, GlossaryEntry> = {
+export const GLOSSARY: Glossary = {
   'literal characters': {
     title: 'Literal characters',
     summary: String.raw`Most characters in a regex match themselves exactly. Letters, digits and underscore have no special meaning by themselves. The exceptions are the metacharacters . * + ? ( ) [ ] { } | ^ $ \ — they need a backslash to match literally.`,
     examples: [
-      { pattern: 'cat', text: 'the cat sat on the mat' },
-      { pattern: 'Hello', text: 'Hello, world!' },
+      { code: '/cat/', input: '"the cat sat on the mat"' },
+      { code: '/Hello/', input: '"Hello, world!"' },
     ],
   },
   escape: {
@@ -46,13 +15,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'A backslash \\ turns a special character into a literal one. The metacharacters that need escaping outside a class are: . * + ? ( ) [ ] { } | ^ $ \\',
     examples: [
       {
-        pattern: String.raw`\.`,
-        text: 'Hello. World.',
+        code: String.raw`/\./`,
+        input: '"Hello. World."',
         note: 'Matches the dot character — not "any character".',
       },
       {
-        pattern: String.raw`\(\)`,
-        text: 'a (b) c',
+        code: String.raw`/\(\)/`,
+        input: '"a (b) c"',
         note: 'Matches literal parentheses.',
       },
     ],
@@ -63,18 +32,18 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'Square brackets define a set of characters. The regex matches one character from the set.',
     examples: [
       {
-        pattern: '[aeiou]',
-        text: 'apple',
+        code: '/[aeiou]/',
+        input: '"apple"',
         note: 'Matches each vowel separately.',
       },
       {
-        pattern: '[a-zA-Z]',
-        text: 'Hello123',
+        code: '/[a-zA-Z]/',
+        input: '"Hello123"',
         note: 'Two ranges combined inside one class.',
       },
       {
-        pattern: '[^0-9]',
-        text: 'a1b2',
+        code: '/[^0-9]/',
+        input: '"a1b2"',
         note: 'Caret at the start negates — matches anything except a digit.',
       },
     ],
@@ -84,8 +53,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary:
       'Inside a character class, a-z denotes every character between a and z in code-point order.',
     examples: [
-      { pattern: '[0-9]', text: 'item42', note: String.raw`Same as \d.` },
-      { pattern: '[a-fA-F]', text: 'CafeFace', note: 'Hex letters.' },
+      { code: '/[0-9]/', input: '"item42"', note: String.raw`Same as \d.` },
+      { code: '/[a-fA-F]/', input: '"CafeFace"', note: 'Hex letters.' },
     ],
   },
   'word character': {
@@ -93,13 +62,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary: String.raw`Matches a letter, digit, or underscore — equivalent to [A-Za-z0-9_]. The uppercase \W matches the opposite.`,
     examples: [
       {
-        pattern: String.raw`\w+`,
-        text: 'foo_bar 42!',
+        code: String.raw`/\w+/`,
+        input: '"foo_bar 42!"',
         note: 'Greedily grabs a "word".',
       },
       {
-        pattern: String.raw`\W`,
-        text: 'a@b c',
+        code: String.raw`/\W/`,
+        input: '"a@b c"',
         note: 'Matches each non-word character.',
       },
     ],
@@ -109,10 +78,10 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary:
       'Apply to the preceding atom and control how many times it can repeat.',
     examples: [
-      { pattern: 'a+', text: 'baaa', note: '+ → 1 or more.' },
-      { pattern: 'a*', text: 'b a', note: '* → 0 or more.' },
-      { pattern: 'a?', text: 'ba', note: '? → optional (0 or 1).' },
-      { pattern: 'a{2,4}', text: 'aaaaa', note: '{n,m} → between n and m.' },
+      { code: '/a+/', input: '"baaa"', note: '+ → 1 or more.' },
+      { code: '/a*/', input: '"b a"', note: '* → 0 or more.' },
+      { code: '/a?/', input: '"ba"', note: '? → optional (0 or 1).' },
+      { code: '/a{2,4}/', input: '"aaaaa"', note: '{n,m} → between n and m.' },
     ],
   },
   greedy: {
@@ -121,13 +90,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'Quantifiers are greedy by default — they grab as much as possible. Add ? after a quantifier to make it lazy and take the shortest match.',
     examples: [
       {
-        pattern: 'a.+b',
-        text: 'a1b a2b',
+        code: '/a.+b/',
+        input: '"a1b a2b"',
         note: 'Greedy: matches the whole "a1b a2b".',
       },
       {
-        pattern: 'a.+?b',
-        text: 'a1b a2b',
+        code: '/a.+?b/',
+        input: '"a1b a2b"',
         note: 'Lazy: stops at the first "b".',
       },
     ],
@@ -138,13 +107,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'Match positions, not characters. They consume no input — they only assert where the engine is.',
     examples: [
       {
-        pattern: '^The',
-        text: 'The cat\nThen the dog',
+        code: '/^The/',
+        input: String.raw`"The cat\nThen the dog"`,
         note: '^ — start of string (or line with the m flag).',
       },
       {
-        pattern: 'end$',
-        text: 'the end',
+        code: '/end$/',
+        input: '"the end"',
         note: '$ — end of string (or line with the m flag).',
       },
     ],
@@ -154,13 +123,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary: String.raw`Zero-width position between a word character (\w) and a non-word character — also at the start and end of the string.`,
     examples: [
       {
-        pattern: String.raw`\bcat\b`,
-        text: 'cat scatter category',
+        code: String.raw`/\bcat\b/`,
+        input: '"cat scatter category"',
         note: 'Only the standalone "cat" matches.',
       },
       {
-        pattern: String.raw`\bword`,
-        text: 'sword wordy',
+        code: String.raw`/\bword/`,
+        input: '"sword wordy"',
         note: 'Matches "word" only at the start of a word.',
       },
     ],
@@ -171,13 +140,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'Parentheses group atoms so a quantifier or | can apply to the whole sub-pattern. They also capture the match by default.',
     examples: [
       {
-        pattern: '(ab)+',
-        text: 'ababab',
+        code: '/(ab)+/',
+        input: '"ababab"',
         note: 'Quantifier applies to the whole "ab".',
       },
       {
-        pattern: '(?:ab)+',
-        text: 'ababab',
+        code: '/(?:ab)+/',
+        input: '"ababab"',
         note: 'Non-capturing variant — same match, no group stored.',
       },
     ],
@@ -188,13 +157,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       'The | operator separates alternatives. Combine with parentheses to limit its scope.',
     examples: [
       {
-        pattern: 'cat|dog',
-        text: 'I have a cat and a dog',
+        code: '/cat|dog/',
+        input: '"I have a cat and a dog"',
         note: 'Matches "cat" or "dog".',
       },
       {
-        pattern: '^(yes|no)$',
-        text: 'yes',
+        code: '/^(yes|no)$/',
+        input: '"yes"',
         note: 'Restrict alternation to whole-line values.',
       },
     ],
@@ -204,13 +173,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary: String.raw`Parentheses remember their match. Refer back to it as \1, \2, ... inside the pattern, or as $1, $2, ... in replacements.`,
     examples: [
       {
-        pattern: String.raw`(\w+)\s\1`,
-        text: 'the the cat',
+        code: String.raw`/(\w+)\s\1/`,
+        input: '"the the cat"',
         note: String.raw`Backreference \1 = same text the group matched.`,
       },
       {
-        pattern: String.raw`(?<name>\w+)`,
-        text: 'Alice',
+        code: String.raw`/(?<name>\w+)/`,
+        input: '"Alice"',
         note: 'Named group — accessible as $<name> in replacements.',
       },
     ],
@@ -221,13 +190,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       '(?=...) succeeds only if what follows matches, without consuming it. Use (?!...) for negative lookahead.',
     examples: [
       {
-        pattern: String.raw`\d+(?= USD)`,
-        text: '42 USD, 99 EUR',
+        code: String.raw`/\d+(?= USD)/`,
+        input: '"42 USD, 99 EUR"',
         note: 'Captures the digits only — " USD" is not consumed.',
       },
       {
-        pattern: String.raw`\d+(?! USD)`,
-        text: '42 USD, 99 EUR',
+        code: String.raw`/\d+(?! USD)/`,
+        input: '"42 USD, 99 EUR"',
         note: 'Negative: matches digits NOT followed by " USD".',
       },
     ],
@@ -238,13 +207,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       '(?<=...) succeeds only if what precedes matches, without consuming it. Use (?<!...) for negative lookbehind.',
     examples: [
       {
-        pattern: String.raw`(?<=\$)\d+`,
-        text: 'price $42',
+        code: String.raw`/(?<=\$)\d+/`,
+        input: '"price $42"',
         note: 'Captures digits preceded by $.',
       },
       {
-        pattern: String.raw`(?<!\$)\d+`,
-        text: '$42 has 17 in change',
+        code: String.raw`/(?<!\$)\d+/`,
+        input: '"$42 has 17 in change"',
         note: 'Negative: matches digits NOT preceded by $.',
       },
     ],
@@ -255,13 +224,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       "The second argument to text.replace(regex, …). Most characters are inserted as-is. A few sequences are substituted: $& for the whole match, $` and $' for the text before/after the match, $1..$9 for capture groups, $<name> for named groups, $$ for a literal dollar sign.",
     examples: [
       {
-        pattern: String.raw`\d+`,
-        text: 'order 42',
+        code: String.raw`/\d+/`,
+        input: '"order 42"',
         note: 'Replacement "[$&]" → "order [42]". $& is the whole match.',
       },
       {
-        pattern: String.raw`(\w+)\s(\w+)`,
-        text: 'John Doe',
+        code: String.raw`/(\w+)\s(\w+)/`,
+        input: '"John Doe"',
         note: 'Replacement "$2 $1" → "Doe John" — swaps the two captures.',
       },
     ],
@@ -271,13 +240,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary: String.raw`Parentheses remember their match. Refer back to them as \1, \2, … inside the pattern, or as $1, $2, … in replacements.`,
     examples: [
       {
-        pattern: String.raw`(\d+)-(\d+)`,
-        text: '2025-11',
+        code: String.raw`/(\d+)-(\d+)/`,
+        input: '"2025-11"',
         note: '$1 = "2025", $2 = "11".',
       },
       {
-        pattern: String.raw`(\w+)\s\1`,
-        text: 'the the cat',
+        code: String.raw`/(\w+)\s\1/`,
+        input: '"the the cat"',
         note: String.raw`Backreference \1 = same text the group matched.`,
       },
     ],
@@ -288,13 +257,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       '(?:...) groups atoms together — so | or a quantifier applies to the whole sub-pattern — without creating a numbered capture. Use it when you need the grouping but not the capture, to keep $1, $2, … aligned with the groups you actually care about.',
     examples: [
       {
-        pattern: '(?:cat|dog)s?',
-        text: 'cats and dogs',
+        code: '/(?:cat|dog)s?/',
+        input: '"cats and dogs"',
         note: 'Group the alternation without capturing it.',
       },
       {
-        pattern: String.raw`(?:Mr|Mrs)\.\s+(\w+)`,
-        text: 'Mr. Smith',
+        code: String.raw`/(?:Mr|Mrs)\.\s+(\w+)/`,
+        input: '"Mr. Smith"',
         note: '$1 is "Smith" — the title is grouped but not captured.',
       },
     ],
@@ -305,13 +274,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
       '(?<name>...) gives the captured text a name. In replacements, refer to it with $<name>; in matched results, it appears on the `groups` object. Names make complex patterns far more readable than numbered groups.',
     examples: [
       {
-        pattern: String.raw`(?<year>\d{4})-(?<month>\d{2})`,
-        text: '2025-11',
+        code: String.raw`/(?<year>\d{4})-(?<month>\d{2})/`,
+        input: '"2025-11"',
         note: 'Access via groups.year, groups.month.',
       },
       {
-        pattern: String.raw`(?<first>\w+)\s+(?<last>\w+)`,
-        text: 'Alan Turing',
+        code: String.raw`/(?<first>\w+)\s+(?<last>\w+)/`,
+        input: '"Alan Turing"',
         note: 'Replacement "$<last>, $<first>" → "Turing, Alan".',
       },
     ],
@@ -321,13 +290,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     summary: String.raw`\1, \2, … reuse the exact text captured earlier in the same pattern. Useful for detecting duplicates, matching paired tags or quoted strings.`,
     examples: [
       {
-        pattern: String.raw`\b(\w+)\s+\1\b`,
-        text: 'the the cat',
+        code: String.raw`/\b(\w+)\s+\1\b/`,
+        input: '"the the cat"',
         note: 'Detect a repeated word.',
       },
       {
-        pattern: String.raw`(['"]).+?\1`,
-        text: `He said "hi" then 'bye'`,
+        code: String.raw`/(['"]).+?\1/`,
+        input: String.raw`"He said \"hi\" then 'bye'"`,
         note: 'Match a string quoted with the same kind of quote.',
       },
     ],

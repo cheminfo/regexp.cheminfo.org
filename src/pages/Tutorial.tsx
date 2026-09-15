@@ -3,18 +3,12 @@ import {
   Card,
   FormGroup,
   H4,
-  Icon,
   InputGroup,
   TextArea,
-  Tooltip,
 } from '@blueprintjs/core';
 import { useMemo, useState } from 'react';
-import { TutorialStepStrip } from 'react-cheminfo/ui';
+import { GlossaryText, HelpIcon, TutorialStepStrip } from 'react-cheminfo/ui';
 
-import {
-  GlossaryDescription,
-  GlossaryEntryTooltip,
-} from '../components/GlossaryTooltip.tsx';
 import { HighlightedText } from '../components/HighlightedText.tsx';
 import { MatchDetails } from '../components/MatchDetails.tsx';
 import { RegexDiagram } from '../components/RegexDiagram.tsx';
@@ -99,7 +93,7 @@ export function Tutorial() {
       </Card>
 
       <Callout intent="primary" icon="info-sign" title={currentStep.title}>
-        <GlossaryDescription description={currentStep.description} />
+        <GlossaryText text={currentStep.description} />
       </Callout>
 
       <div className="split">
@@ -107,17 +101,25 @@ export function Tutorial() {
           <Card elevation={1}>
             <div className="card-heading">
               <H4 style={{ margin: 0 }}>Try it</H4>
-              <Tooltip
-                content={<GlossaryEntryTooltip entry={TRY_IT_HELP} />}
-                popoverClassName="glossary-popover"
+              <HelpIcon
+                content={{
+                  title: TRY_IT_HELP.title,
+                  body: (
+                    <>
+                      <div>{TRY_IT_HELP.summary}</div>
+                      <ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>
+                        {TRY_IT_HELP.flags.map((flag) => (
+                          <li key={flag.key}>
+                            <code>{flag.key}</code> — {flag.note}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ),
+                }}
+                size={14}
                 placement="right"
-              >
-                <Icon
-                  icon="help"
-                  size={14}
-                  aria-label="How to use the playground"
-                />
-              </Tooltip>
+              />
             </div>
             <RegexInput
               pattern={pattern}

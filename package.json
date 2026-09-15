@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
+    "check-deploy": "node node_modules/react-cheminfo/bin/check-deploy.mjs",
     "check-tokens": "node node_modules/react-cheminfo/bin/check-tokens.mjs src",
     "check-types": "tsc --noEmit",
     "dev": "vite",
@@ -14,7 +15,7 @@
     "preview": "vite preview",
     "prettier": "prettier --check .",
     "prettier-write": "prettier --write .",
-    "test": "npm run test-only && npm run check-types && npm run check-tokens && npm run eslint && npm run prettier",
+    "test": "npm run test-only && npm run check-types && npm run check-tokens && npm run check-deploy && npm run eslint && npm run prettier",
     "test-e2e": "playwright test",
     "test-e2e-ui": "playwright test --ui",
     "test-only": "vitest run --coverage"
@@ -23,7 +24,7 @@
     "@blueprintjs/core": "^6.18.0",
     "@blueprintjs/icons": "^6.13.0",
     "react": "^19.2.8",
-    "react-cheminfo": "^0.11.0",
+    "react-cheminfo": "^0.13.0",
     "react-dom": "^19.2.8",
     "react-science": "^23.0.0",
     "regexper": "^1.0.2"

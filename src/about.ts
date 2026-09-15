@@ -6,6 +6,7 @@
  */
 
 import type { AboutContent } from 'react-cheminfo/core';
+import { PLATFORM_WORK, TEACHING_WORK } from 'react-cheminfo/core';
 
 export const ABOUT: AboutContent = {
   siteId: 'regexp',
@@ -18,8 +19,11 @@ export const ABOUT: AboutContent = {
     'Print the cheatsheet, or look one of 19 terms up in the glossary.',
   ],
   paragraphs: [
-    'This site replaces the RegExp explorer view of the cheminfo visualizer. It keeps that tool’s live tester and railroad diagram, and adds the tutorial, the graded exercises, the cheatsheet and the glossary.',
-    'Luc Patiny writes and provides it, at EPFL in Lausanne. Every pattern runs in your browser through the JavaScript RegExp engine, so nothing you type is sent anywhere.',
+    'The live tester and its railroad diagram sit at the centre of the site, and the tutorial, the graded exercises, the cheatsheet and the glossary are built around them.',
+    'Every pattern runs in your browser through the JavaScript RegExp engine, so nothing you type is sent anywhere.',
   ],
+  people: [{ name: 'Luc Patiny' }],
+  providedBy: ['epfl'],
   credits: ['blueprint', 'react-cheminfo', 'react', 'vite'],
+  cite: [PLATFORM_WORK, TEACHING_WORK],
 };

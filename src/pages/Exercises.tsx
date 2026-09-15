@@ -1,7 +1,5 @@
 import {
-  Alert,
   Button,
-  ButtonGroup,
   Callout,
   Card,
   Code,
@@ -10,82 +8,37 @@ import {
   H5,
   Icon,
   InputGroup,
-  ProgressBar,
   Tag,
 } from '@blueprintjs/core';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ProgressRecords } from 'react-cheminfo/core';
+import {
+  failedValidation,
+  localStorageProgressStore,
+  pluralize,
+  progressSummary,
+} from 'react-cheminfo/core';
+import {
+  ExerciseActions,
+  ExerciseProgressHeader,
+  ExerciseStatusIcon,
+  HintLadder,
+  LEVEL_INTENT,
+} from 'react-cheminfo/ui';
 
 import { RegexDiagram } from '../components/RegexDiagram.tsx';
 import { RegexInput } from '../components/RegexInput.tsx';
 import { EXERCISES } from '../data/exercises.ts';
 import { compileRegex } from '../regex/compile.ts';
-import type { TestCaseResult } from '../regex/validate.ts';
+import type { ExerciseCaseResult } from '../regex/validate.ts';
 import { validateExercise } from '../regex/validate.ts';
+import { lastExercise } from '../state/lastExercise.ts';
 import { parsePath, routePath } from '../state/router.ts';
 import { pathWithoutBase, withBase } from '../state/site.ts';
 import type { Exercise, ExerciseState } from '../types.ts';
 
-const STORAGE_KEY = 'regexp-cheminfo:exercise-state:v1';
-const LAST_EXERCISE_KEY = 'regexp-cheminfo:active-exercise:v1';
-
-function readExerciseIdFromAddress(): string | null {
-  const { exerciseId } = parsePath(
-    pathWithoutBase(globalThis.location.pathname),
-  );
-  if (!exerciseId) return null;
-  return EXERCISES.some((ex) => ex.id === exerciseId) ? exerciseId : null;
-}
-
-function readLastExerciseId(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const stored = window.localStorage.getItem(LAST_EXERCISE_KEY);
-    if (!stored) return null;
-    return EXERCISES.some((ex) => ex.id === stored) ? stored : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeLastExerciseId(id: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(LAST_EXERCISE_KEY, id);
-  } catch {
-    // Ignore quota errors — last-active id is best-effort.
-  }
-}
-
-type StateMap = Record<string, ExerciseState>;
-
-function loadState(): StateMap {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return {};
-    // Migrate older entries that lack the `replacement` field.
-    const map = parsed as Record<string, Partial<ExerciseState>>;
-    const migrated: StateMap = {};
-    for (const [id, value] of Object.entries(map)) {
-      migrated[id] = { ...defaultState(), ...value };
-    }
-    return migrated;
-  } catch {
-    return {};
-  }
-}
-
-function saveState(state: StateMap) {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Ignore quota errors — exercise state is best-effort.
-  }
-}
+type StateMap = ProgressRecords<ExerciseState>;
 
 function defaultState(): ExerciseState {
   return {
@@ -99,11 +52,32 @@ function defaultState(): ExerciseState {
   };
 }
 
-const LEVEL_INTENT: Record<string, 'success' | 'warning' | 'danger'> = {
-  beginner: 'success',
-  intermediate: 'warning',
-  advanced: 'danger',
-};
+const PROGRESS = localStorageProgressStore<ExerciseState>({
+  key: 'regexp-cheminfo:exercise-state',
+  version: 1,
+  defaults: defaultState(),
+});
+
+const EXERCISE_IDS: readonly string[] = EXERCISES.map((ex) => ex.id);
+
+function readExerciseIdFromAddress(): string | null {
+  const { exerciseId } = parsePath(
+    pathWithoutBase(globalThis.location.pathname),
+  );
+  if (!exerciseId) return null;
+  return EXERCISES.some((ex) => ex.id === exerciseId) ? exerciseId : null;
+}
+
+function readLastExerciseId(): string | null {
+  const { id } = lastExercise.read().value;
+  return EXERCISES.some((ex) => ex.id === id) ? id : null;
+}
+
+function loadState(): StateMap {
+  const stored = PROGRESS.load();
+  // The localStorage binding answers at once; a networked one would not.
+  return stored instanceof Promise ? {} : stored;
+}
 
 const FIRST_EXERCISE: Exercise | undefined = EXERCISES[0];
 
@@ -121,14 +95,13 @@ export function Exercises() {
       readLastExerciseId() ??
       FIRST_EXERCISE?.id ??
       '';
-    if (id) writeLastExerciseId(id);
+    if (id) lastExercise.write({ id });
     return id;
   });
   const [statesByExercise, setStatesByExercise] = useState<StateMap>(loadState);
-  const [clearAlertOpen, setClearAlertOpen] = useState(false);
 
   useEffect(() => {
-    saveState(statesByExercise);
+    void PROGRESS.save(statesByExercise);
   }, [statesByExercise]);
 
   const exercise = EXERCISES.find((ex) => ex.id === activeId) ?? FIRST_EXERCISE;
@@ -137,7 +110,7 @@ export function Exercises() {
 
   const selectExercise = useCallback((id: string) => {
     setActiveIdState(id);
-    writeLastExerciseId(id);
+    lastExercise.write({ id });
     // Each exercise is an address of its own, so it can be handed out and
     // indexed rather than only reached by clicking down the list.
     globalThis.history.pushState(
@@ -149,16 +122,23 @@ export function Exercises() {
 
   const updateState = useCallback(
     (patch: Partial<ExerciseState>) => {
-      if (!exerciseId) return;
-      setStatesByExercise((prev) => ({
-        ...prev,
-        [exerciseId]: {
-          ...(prev[exerciseId] ?? defaultState()),
-          ...patch,
-        },
-      }));
+      if (!exercise) return;
+      const { id } = exercise;
+      setStatesByExercise((prev) => {
+        const next = { ...(prev[id] ?? defaultState()), ...patch };
+        // An answer that passes is solved as it is typed, so the menu badge
+        // follows without a click on "Check".
+        if (
+          next.status !== 'solved' &&
+          validateExercise(exercise, next.pattern, next.flags, next.replacement)
+            .passed
+        ) {
+          next.status = 'solved';
+        }
+        return { ...prev, [id]: next };
+      });
     },
-    [exerciseId],
+    [exercise],
   );
 
   const compiled = useMemo(
@@ -168,11 +148,7 @@ export function Exercises() {
 
   const validation = useMemo(() => {
     if (!exercise) {
-      return {
-        passed: false,
-        error: null,
-        cases: [] as TestCaseResult[],
-      };
+      return failedValidation<ExerciseCaseResult>('No exercise to check.');
     }
     return validateExercise(
       exercise,
@@ -182,17 +158,7 @@ export function Exercises() {
     );
   }, [exercise, state.pattern, state.flags, state.replacement]);
 
-  useEffect(() => {
-    if (validation.passed && state.status !== 'solved') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: auto-mark as solved when the student types a valid answer, so the menu badge updates without requiring a "Check" click.
-      updateState({ status: 'solved' });
-    }
-  }, [validation.passed, state.status, updateState]);
-
-  const solvedCount = EXERCISES.filter(
-    (ex) => statesByExercise[ex.id]?.status === 'solved',
-  ).length;
-  const progress = solvedCount / EXERCISES.length;
+  const summary = progressSummary(statesByExercise, EXERCISE_IDS);
 
   if (!exercise) {
     return <Card>No exercises available.</Card>;
@@ -226,7 +192,6 @@ export function Exercises() {
 
   function clearAllAnswers() {
     setStatesByExercise({});
-    setClearAlertOpen(false);
   }
 
   const isReplace = exercise.kind === 'replace';
@@ -234,66 +199,16 @@ export function Exercises() {
   return (
     <div className="section-stack">
       <Card elevation={1}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <H4 style={{ margin: 0 }}>Progress</H4>
-          <Button
-            icon="trash"
-            variant="minimal"
-            intent="danger"
-            onClick={() => {
-              setClearAlertOpen(true);
-            }}
-            disabled={Object.keys(statesByExercise).length === 0}
-            text="Clear all answers"
-          />
-        </div>
-        <ProgressBar
-          value={progress}
-          intent="primary"
-          animate={solvedCount < EXERCISES.length}
-          stripes={false}
+        <H4 style={{ marginTop: 0 }}>Progress</H4>
+        <ExerciseProgressHeader
+          summary={summary}
+          onClearAll={clearAllAnswers}
+          clearDisabled={Object.keys(statesByExercise).length === 0}
         />
-        <div
-          style={{
-            marginTop: 6,
-            fontSize: 13,
-            color: '#5c7080',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span>
-            {solvedCount} / {EXERCISES.length} exercises solved
-          </span>
-          <span>{Math.round(progress * 100)}%</span>
-        </div>
       </Card>
 
-      <Alert
-        isOpen={clearAlertOpen}
-        intent="danger"
-        icon="trash"
-        confirmButtonText="Clear all answers"
-        cancelButtonText="Cancel"
-        onCancel={() => {
-          setClearAlertOpen(false);
-        }}
-        onConfirm={clearAllAnswers}
-      >
-        <p>
-          This will permanently erase your saved progress on every exercise.
-          This action cannot be undone.
-        </p>
-      </Alert>
-
       <div className="exercise-list">
-        <div className="exercise-menu" role="navigation" aria-label="Exercises">
+        <nav className="exercise-menu" aria-label="Exercises">
           {EXERCISES.map((ex) => {
             const exStored = statesByExercise[ex.id];
             const exState = exStored?.status ?? 'idle';
@@ -301,16 +216,6 @@ export function Exercises() {
             const isActive = ex.id === exercise.id;
             const isSolved = exState === 'solved';
             const isAttempted = exState === 'attempted';
-            const icon = isSolved
-              ? 'tick-circle'
-              : isAttempted
-                ? 'warning-sign'
-                : 'circle';
-            const intent = isSolved
-              ? 'success'
-              : isAttempted
-                ? 'warning'
-                : 'none';
             const statusClass = isSolved
               ? 'is-solved'
               : isAttempted
@@ -328,11 +233,11 @@ export function Exercises() {
                 className={statusClass}
               >
                 <div className="ex-meta">
-                  <Icon icon={icon} intent={intent} />
+                  <ExerciseStatusIcon status={exState} />
                   <div className="ex-body">
                     <span className="ex-title">{ex.title}</span>
                     <div className="ex-tags">
-                      <Tag minimal intent={LEVEL_INTENT[ex.level] ?? 'none'}>
+                      <Tag minimal intent={LEVEL_INTENT[ex.level]}>
                         {ex.level}
                       </Tag>
                       {ex.kind === 'replace' && (
@@ -352,11 +257,11 @@ export function Exercises() {
                           icon="lightbulb"
                           title={
                             isSolved
-                              ? `Solved with ${exHints} hint${exHints > 1 ? 's' : ''}`
-                              : `${exHints} hint${exHints > 1 ? 's' : ''} revealed`
+                              ? `Solved with ${exHints} ${pluralize(exHints, 'hint')}`
+                              : `${exHints} ${pluralize(exHints, 'hint')} revealed`
                           }
                         >
-                          {exHints} hint{exHints > 1 ? 's' : ''}
+                          {exHints} {pluralize(exHints, 'hint')}
                         </Tag>
                       )}
                     </div>
@@ -365,12 +270,12 @@ export function Exercises() {
               </Button>
             );
           })}
-        </div>
+        </nav>
 
         <div className="section-stack">
           <Card elevation={1}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Tag minimal intent={LEVEL_INTENT[exercise.level] ?? 'none'}>
+              <Tag minimal intent={LEVEL_INTENT[exercise.level]}>
                 {exercise.level}
               </Tag>
               <Tag minimal intent={isReplace ? 'primary' : 'none'}>
@@ -417,19 +322,18 @@ export function Exercises() {
             )}
 
             <div style={{ marginTop: 12 }}>
-              <ButtonGroup>
-                <Button
-                  icon="tick-circle"
-                  intent="primary"
-                  onClick={check}
-                  text="Check my regex"
-                />
-                <Button
-                  icon="lightbulb"
-                  onClick={revealHint}
-                  disabled={state.hintsRevealed >= exercise.hints.length}
-                  text={`Reveal hint (${state.hintsRevealed}/${exercise.hints.length})`}
-                />
+              <ExerciseActions
+                onCheck={check}
+                checkLabel="Check my regex"
+                onRevealHint={revealHint}
+                hintsRevealed={state.hintsRevealed}
+                hintCount={exercise.hints.length}
+                onToggleSolution={() => {
+                  updateState({ showSolution: !state.showSolution });
+                }}
+                showSolution={state.showSolution}
+                onReset={resetExercise}
+              >
                 <Button
                   icon="diagram-tree"
                   onClick={() => {
@@ -437,17 +341,7 @@ export function Exercises() {
                   }}
                   text={state.showDiagram ? 'Hide diagram' : 'Show diagram'}
                 />
-                <Button
-                  icon={state.showSolution ? 'eye-off' : 'eye-open'}
-                  onClick={() => {
-                    updateState({ showSolution: !state.showSolution });
-                  }}
-                  text={
-                    state.showSolution ? 'Hide solution' : 'Reveal solution'
-                  }
-                />
-                <Button icon="refresh" onClick={resetExercise} text="Reset" />
-              </ButtonGroup>
+              </ExerciseActions>
             </div>
 
             {state.status === 'solved' && validation.passed && (
@@ -461,8 +355,8 @@ export function Exercises() {
                 {state.hintsRevealed > 0 && (
                   <div style={{ marginTop: 6 }}>
                     <Tag minimal intent="warning" icon="lightbulb">
-                      Solved with {state.hintsRevealed} hint
-                      {state.hintsRevealed > 1 ? 's' : ''}
+                      Solved with {state.hintsRevealed}{' '}
+                      {pluralize(state.hintsRevealed, 'hint')}
                     </Tag>
                   </div>
                 )}
@@ -480,18 +374,12 @@ export function Exercises() {
             )}
 
             {state.hintsRevealed > 0 && (
-              <Callout
-                intent="primary"
-                icon="lightbulb"
-                title="Hints"
-                style={{ marginTop: 12 }}
-              >
-                <ol style={{ marginTop: 4, marginBottom: 0, paddingLeft: 18 }}>
-                  {exercise.hints.slice(0, state.hintsRevealed).map((hint) => (
-                    <li key={hint}>{hint}</li>
-                  ))}
-                </ol>
-              </Callout>
+              <div style={{ marginTop: 12 }}>
+                <HintLadder
+                  hints={exercise.hints}
+                  revealed={state.hintsRevealed}
+                />
+              </div>
             )}
 
             {state.showSolution && (
@@ -561,7 +449,7 @@ export function Exercises() {
 }
 
 interface TestCaseRowProps {
-  result: TestCaseResult;
+  result: ExerciseCaseResult;
   hasCompileError: boolean;
 }
 
@@ -612,7 +500,7 @@ function TestCaseRow({ result, hasCompileError }: TestCaseRowProps) {
   );
 }
 
-function FailureDetail({ result }: { result: TestCaseResult }) {
+function FailureDetail({ result }: { result: ExerciseCaseResult }) {
   if (result.kind === 'replace') {
     return (
       <div className="failure-detail">
@@ -755,7 +643,7 @@ function renderVisibleParts(text: string): ReactNode[] {
   return parts;
 }
 
-function testCaseKey(result: TestCaseResult): string {
+function testCaseKey(result: ExerciseCaseResult): string {
   if (result.kind === 'replace') {
     return `replace::${result.testCase.text}::${result.testCase.expected}`;
   }

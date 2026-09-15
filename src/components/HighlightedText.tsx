@@ -1,4 +1,5 @@
 import { Tag } from '@blueprintjs/core';
+import { pluralize } from 'react-cheminfo/core';
 
 import type { MatchSegment } from '../types.ts';
 
@@ -59,7 +60,7 @@ export function HighlightedText({ segments, count }: Props) {
       </div>
       <div className="match-summary">
         <Tag intent={count > 0 ? 'success' : 'none'} minimal>
-          {count} match{count === 1 ? '' : 'es'}
+          {count} {pluralize(count, 'match', 'matches')}
         </Tag>
       </div>
     </>

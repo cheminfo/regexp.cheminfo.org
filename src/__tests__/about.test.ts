@@ -1,4 +1,9 @@
-import { aboutProblems, resolveAbout } from 'react-cheminfo/core';
+import {
+  PLATFORM_WORK,
+  TEACHING_WORK,
+  aboutProblems,
+  resolveAbout,
+} from 'react-cheminfo/core';
 import { expect, test } from 'vitest';
 
 import { ABOUT } from '../about.ts';
@@ -39,5 +44,9 @@ test('every borrowed work the site runs on is named, and resolves', () => {
     'https://github.com/cheminfo/regexp.cheminfo.org/issues',
   );
   expect(about.license).toBe('MIT');
-  expect(about.cite).toStrictEqual([]);
+  expect(about.cite).toStrictEqual([PLATFORM_WORK, TEACHING_WORK]);
+  expect(about.people).toStrictEqual([{ name: 'Luc Patiny' }]);
+  expect(about.providedBy.map((provider) => provider.id)).toStrictEqual([
+    'epfl',
+  ]);
 });
