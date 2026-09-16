@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import { cheminfoPrerender } from 'react-cheminfo/vite';
+import { cheminfoBuildInfo, cheminfoPrerender } from 'react-cheminfo/vite';
 import { defineConfig } from 'vite';
 
 import { PAGE_ROUTES, SITE_PAGES } from './src/state/routes.ts';
@@ -21,6 +21,7 @@ export default defineConfig({
   base: './',
   plugins: [
     react(),
+    cheminfoBuildInfo(),
     cheminfoPrerender({
       site: 'regexp',
       routes: PAGE_ROUTES,

@@ -5,11 +5,15 @@
  * family holds the same sections in the same order and one voice.
  */
 
+import { BUILD_INFO } from 'react-cheminfo/build-info';
 import type { AboutContent } from 'react-cheminfo/core';
 import { PLATFORM_WORK, TEACHING_WORK } from 'react-cheminfo/core';
 
 export const ABOUT: AboutContent = {
   siteId: 'regexp',
+  // Which release, built when, from which commit: the build says so,
+  // because a version written by hand is wrong by the next release.
+  build: BUILD_INFO,
   what: 'Type a pattern and see what it matches, in a guided tutorial, a free playground and a set of graded exercises.',
   can: [
     'Follow 13 tutorial steps, from a literal match to lookahead and named groups.',
