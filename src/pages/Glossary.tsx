@@ -1,8 +1,10 @@
 import { Card, H4, H5 } from '@blueprintjs/core';
 import { useMemo, useState } from 'react';
 import type { GlossaryEntry } from 'react-cheminfo/core';
+import { ClickToCopy } from 'react-cheminfo/ui';
 
 import { GLOSSARY } from '../data/glossary.ts';
+import { literalPattern } from '../regex/compile.ts';
 
 interface GlossaryRow {
   key: string;
@@ -55,7 +57,11 @@ export function Glossary() {
           className="glossary-search bp6-input"
         />
       </div>
-      <Card elevation={1} aria-label="Regular expression glossary">
+      <Card
+        elevation={1}
+        aria-label="Regular expression glossary"
+        className="text-selectable"
+      >
         <H4>Glossary</H4>
         <p style={{ marginTop: 0, color: '#5c7080' }}>
           Every term that appears underlined in the tutorial and exercise
@@ -87,7 +93,13 @@ function GlossaryCard({ entry }: { entry: GlossaryEntry }) {
         <ul className="glossary-card__examples">
           {entry.examples.map((example) => (
             <li key={`${example.code}::${example.input ?? ''}`}>
-              <code>{example.code}</code>
+              <ClickToCopy
+                as="code"
+                label="pattern"
+                value={literalPattern(example.code)}
+              >
+                {example.code}
+              </ClickToCopy>
               {example.input !== undefined && (
                 <>
                   {' on '}

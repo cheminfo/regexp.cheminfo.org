@@ -1,6 +1,12 @@
 import { expect, test } from 'vitest';
 
-import { applyReplace, compileRegex, findMatches } from '../compile.ts';
+import { GLOSSARY } from '../../data/glossary.ts';
+import {
+  applyReplace,
+  compileRegex,
+  findMatches,
+  literalPattern,
+} from '../compile.ts';
 
 test('compileRegex returns null on empty pattern', () => {
   const result = compileRegex('', '');
@@ -84,4 +90,38 @@ test('applyReplace substitutes captured groups', () => {
 
 test('applyReplace returns original text on null regex', () => {
   expect(applyReplace(null, 'hello', 'x')).toBe('hello');
+});
+
+test('literalPattern reads the source between the slashes', () => {
+  expect(literalPattern(String.raw`/\bcat\b/`)).toBe(String.raw`\bcat\b`);
+  expect(literalPattern('/a+/gi')).toBe('a+');
+  expect(literalPattern(String.raw`/a\/b/`)).toBe(String.raw`a\/b`);
+});
+
+test('literalPattern leaves a string that is not a literal alone', () => {
+  expect(literalPattern('cat')).toBe('cat');
+  expect(literalPattern('/')).toBe('/');
+});
+
+test('every glossary example is a literal whose pattern compiles', () => {
+  for (const entry of Object.values(GLOSSARY)) {
+    for (const example of entry.examples) {
+      expect(example.code.startsWith('/')).toBe(true);
+
+      const source = literalPattern(example.code);
+
+      expect(source).not.toBe(example.code);
+      expect(compileRegex(source, '').error).toBeNull();
+    }
+  }
+});
+
+test('findMatches counts zero-width matches that carry no text', () => {
+  const { regex } = compileRegex(String.raw`\b`, 'g');
+  const result = findMatches(regex, 'cat sat');
+
+  expect(result.count).toBe(4);
+  expect(
+    result.segments.filter((s) => s.isMatch).map((s) => s.text),
+  ).toStrictEqual(['', '', '', '']);
 });

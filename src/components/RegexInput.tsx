@@ -77,7 +77,7 @@ export function RegexInput({
           />
         </div>
       </div>
-      {error && <div className="regex-error">⚠ {error}</div>}
+      {error && <div className="regex-error text-selectable">⚠ {error}</div>}
       <div className="flag-toggles" role="group" aria-label="Toggle flags">
         {FLAGS.map((flag) => {
           const active = flags.includes(flag.key);

@@ -2,7 +2,6 @@ import {
   Button,
   Callout,
   Card,
-  Code,
   FormGroup,
   H4,
   H5,
@@ -20,6 +19,7 @@ import {
   progressSummary,
 } from 'react-cheminfo/core';
 import {
+  ClickToCopy,
   ExerciseActions,
   ExerciseProgressHeader,
   ExerciseStatusIcon,
@@ -389,15 +389,26 @@ export function Exercises() {
                 title="Sample solution"
                 style={{ marginTop: 12 }}
               >
-                <Code>
+                <ClickToCopy
+                  as="code"
+                  className="bp6-code"
+                  label="pattern"
+                  value={exercise.solution}
+                >
                   /{exercise.solution}/{(exercise.solutionFlags ?? []).join('')}
-                </Code>
+                </ClickToCopy>
                 {isReplace && (
                   <div style={{ marginTop: 6 }}>
                     Replacement:{' '}
-                    <Code>
+                    <ClickToCopy
+                      as="code"
+                      className="bp6-code"
+                      label="replacement"
+                      value={exercise.solutionReplacement}
+                      disabled={exercise.solutionReplacement === ''}
+                    >
                       {displayReplacement(exercise.solutionReplacement)}
-                    </Code>
+                    </ClickToCopy>
                   </div>
                 )}
               </Callout>
@@ -505,9 +516,9 @@ function FailureDetail({ result }: { result: ExerciseCaseResult }) {
     return (
       <div className="failure-detail">
         <span className="fd-label">Input</span>
-        <span className="fd-full">
+        <div className="fd-full">
           <VisibleText text={result.testCase.text} />
-        </span>
+        </div>
         <span className="fd-label">Expected</span>
         <VisibleText text={result.testCase.expected} />
         <span className="fd-label">Got</span>
@@ -527,9 +538,9 @@ function FailureDetail({ result }: { result: ExerciseCaseResult }) {
       return (
         <div className="failure-detail">
           <span className="fd-label">Input</span>
-          <span className="fd-full">
+          <div className="fd-full">
             <VisibleText text={testCase.text} />
-          </span>
+          </div>
           <span className="fd-label">Expected</span>
           <span className="fd-error fd-full">
             a match
@@ -548,9 +559,9 @@ function FailureDetail({ result }: { result: ExerciseCaseResult }) {
       return (
         <div className="failure-detail">
           <span className="fd-label">Input</span>
-          <span className="fd-full">
+          <div className="fd-full">
             <VisibleText text={testCase.text} />
-          </span>
+          </div>
           <span className="fd-label">Expected match</span>
           <VisibleText text={testCase.expected} />
           <span className="fd-label">Got match</span>
@@ -562,9 +573,9 @@ function FailureDetail({ result }: { result: ExerciseCaseResult }) {
     return (
       <div className="failure-detail">
         <span className="fd-label">Input</span>
-        <span className="fd-full">
+        <div className="fd-full">
           <VisibleText text={testCase.text} />
-        </span>
+        </div>
         <span className="fd-label">Problem</span>
         <span className="fd-error fd-full">{reason}</span>
       </div>
@@ -575,9 +586,9 @@ function FailureDetail({ result }: { result: ExerciseCaseResult }) {
   return (
     <div className="failure-detail">
       <span className="fd-label">Input</span>
-      <span className="fd-full">
+      <div className="fd-full">
         <VisibleText text={testCase.text} />
-      </span>
+      </div>
       <span className="fd-label">Problem</span>
       <span className="fd-error fd-full">
         should not match, but matched <VisibleText text={actual ?? ''} inline />
@@ -596,9 +607,14 @@ function VisibleText({ text, inline = false }: VisibleTextProps) {
     return <span className="visible-text empty-string">(empty string)</span>;
   }
   return (
-    <span className={`visible-text${inline ? ' is-inline' : ''}`}>
+    <ClickToCopy
+      as={inline ? 'span' : 'div'}
+      className={`visible-text${inline ? ' is-inline' : ''}`}
+      label="test text"
+      value={text}
+    >
       {renderVisibleParts(text)}
-    </span>
+    </ClickToCopy>
   );
 }
 

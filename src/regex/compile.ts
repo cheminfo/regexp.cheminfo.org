@@ -94,6 +94,19 @@ export function findMatches(regex: RegExp | null, text: string): MatchResult {
 }
 
 /**
+ * Read the source of a regular expression written as a `/…/flags` literal.
+ * The pattern box takes the source alone — the slashes are drawn around it and
+ * the flags live in their own field — so that is what a reader pastes.
+ * @param literal - The literal as it is shown, for instance `` /\bcat\b/g ``.
+ * @returns The source between the slashes, or the input when it is not a literal.
+ */
+export function literalPattern(literal: string): string {
+  const end = literal.lastIndexOf('/');
+  if (!literal.startsWith('/') || end <= 0) return literal;
+  return literal.slice(1, end);
+}
+
+/**
  * Apply a regex-based replacement.
  * @param regex - The compiled regex (or `null`).
  * @param text - The original text.

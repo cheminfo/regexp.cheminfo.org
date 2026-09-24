@@ -1,4 +1,5 @@
 import { pluralize } from 'react-cheminfo/core';
+import { ClickToCopy } from 'react-cheminfo/ui';
 
 import type { MatchInfo } from '../types.ts';
 
@@ -93,15 +94,24 @@ function Row({
         <code>{token}</code>
       </td>
       <td className="match-card-label">{label}</td>
-      <td className="match-card-value">
-        {value === undefined ? (
+      {value === undefined ? (
+        <td className="match-card-value">
           <span className="match-card-undefined">undefined</span>
-        ) : value === '' ? (
+        </td>
+      ) : value === '' ? (
+        <td className="match-card-value">
           <span className="match-card-empty">(empty)</span>
-        ) : (
+        </td>
+      ) : (
+        <ClickToCopy
+          as="td"
+          className="match-card-value"
+          label={`value of ${token}`}
+          value={value}
+        >
           <code>{value}</code>
-        )}
-      </td>
+        </ClickToCopy>
+      )}
     </tr>
   );
 }

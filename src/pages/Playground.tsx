@@ -13,6 +13,7 @@ import { HighlightedText } from '../components/HighlightedText.tsx';
 import { MatchDetails } from '../components/MatchDetails.tsx';
 import { RegexDiagram } from '../components/RegexDiagram.tsx';
 import { RegexInput } from '../components/RegexInput.tsx';
+import { ReplaceOutput } from '../components/ReplaceOutput.tsx';
 import { applyReplace, compileRegex, findMatches } from '../regex/compile.ts';
 
 const DEFAULT_TEXT = `Lorem ipsum dolor sit asd. amet, consectetur adipiscing elit.
@@ -145,21 +146,7 @@ export function Playground() {
                 <H4 style={{ fontSize: 13, color: '#5c7080' }}>
                   After replacement
                 </H4>
-                <pre
-                  style={{
-                    margin: 0,
-                    padding: 10,
-                    background: '#f5f8fa',
-                    border: '1px solid var(--border, #d3d8de)',
-                    borderRadius: 3,
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {replaced}
-                </pre>
+                <ReplaceOutput text={replaced} />
               </div>
             )}
           </Card>

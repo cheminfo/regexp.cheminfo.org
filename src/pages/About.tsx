@@ -1,6 +1,6 @@
 import { Code } from '@blueprintjs/core';
 import type { CSSProperties, ReactElement } from 'react';
-import { AboutPage, AboutSection } from 'react-cheminfo/ui';
+import { AboutPage, AboutSection, CodeBlock } from 'react-cheminfo/ui';
 
 import { ABOUT } from '../about.ts';
 
@@ -41,16 +41,12 @@ function BeyondJavaScript(): ReactElement {
         and lookarounds. Add <Code>-n</Code> for line numbers, <Code>-o</Code>{' '}
         to print the matched portion alone, <Code>-r</Code> to recurse.
       </p>
-      <pre style={PRE_STYLE}>
-        {String.raw`# find ISO dates in every .log file under the current dir
-grep -rnE '[0-9]{4}-[0-9]{2}-[0-9]{2}' .
-
-# only the matched values, using PCRE shorthand classes
-grep -roP '\d{4}-\d{2}-\d{2}' .
-
-# lines that DO NOT contain "ERROR"
-grep -v 'ERROR' app.log`}
-      </pre>
+      <CodeBlock
+        code={GREP_COMMANDS}
+        tone="muted"
+        copyable
+        className="about-command"
+      />
       <p style={PARAGRAPH_STYLE}>
         <ExternalLink href="https://github.com/BurntSushi/ripgrep">
           ripgrep
@@ -69,16 +65,12 @@ grep -v 'ERROR' app.log`}
         JavaScript&rsquo;s <Code>$1</Code>. The <Code>g</Code> after the closing
         slash means every match on the line, not just the first.
       </p>
-      <pre style={PRE_STYLE}>
-        {String.raw`# swap "first last" into "last, first" in place
-sed -E -i 's/^([A-Za-z]+) ([A-Za-z]+)$/\2, \1/' names.txt
-
-# delete blank lines
-sed -E '/^\s*$/d' file.txt
-
-# uppercase a hex colour
-echo '#abcdef' | sed -E 's/.*/\U&/'`}
-      </pre>
+      <CodeBlock
+        code={SED_COMMANDS}
+        tone="muted"
+        copyable
+        className="about-command"
+      />
       <p style={PARAGRAPH_STYLE}>
         On macOS, BSD <Code>sed -i</Code> wants a backup suffix — write{' '}
         <Code>{`sed -i ''`}</Code> for none — and GNU extensions such as{' '}
@@ -95,27 +87,12 @@ echo '#abcdef' | sed -E 's/.*/\U&/'`}
         as a raw string, <Code>r&quot;...&quot;</Code>, or Python eats the
         backslashes before <Code>re</Code> sees them.
       </p>
-      <pre style={PRE_STYLE}>
-        {String.raw`import re
-
-# Every digit run in a string
-re.findall(r"\d+", "Room 42, floor 7")           # -> ['42', '7']
-
-# Named groups
-m = re.match(r"(?P<year>\d{4})-(?P<month>\d{2})", "2026-05")
-m.group("year"), m.group("month")                  # -> ('2026', '05')
-
-# Replace, with a backreference
-re.sub(r"\b(\w+) \1\b", r"\1", "the the cat")  # -> 'the cat'
-
-# Verbose / commented patterns
-pattern = re.compile(r"""
-    \b           # word boundary
-    \d{4}        # year
-    -
-    \d{2}        # month
-""", re.VERBOSE)`}
-      </pre>
+      <CodeBlock
+        code={PYTHON_EXAMPLE}
+        tone="muted"
+        copyable
+        className="about-command"
+      />
       <p style={PARAGRAPH_STYLE}>
         The third-party{' '}
         <ExternalLink href="https://github.com/mrabarnett/mrab-regex">
@@ -153,15 +130,40 @@ const HEADING_STYLE = {
   fontWeight: 600,
 } as const satisfies CSSProperties;
 
-const PRE_STYLE = {
-  margin: '8px 0 0',
-  padding: 10,
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius)',
-  background: 'var(--surface-sunken)',
-  fontFamily: 'var(--font-mono)',
-  fontSize: 12,
-  lineHeight: 1.5,
-  overflowX: 'auto',
-  whiteSpace: 'pre',
-} as const satisfies CSSProperties;
+const GREP_COMMANDS = String.raw`# find ISO dates in every .log file under the current dir
+grep -rnE '[0-9]{4}-[0-9]{2}-[0-9]{2}' .
+
+# only the matched values, using PCRE shorthand classes
+grep -roP '\d{4}-\d{2}-\d{2}' .
+
+# lines that DO NOT contain "ERROR"
+grep -v 'ERROR' app.log`;
+
+const SED_COMMANDS = String.raw`# swap "first last" into "last, first" in place
+sed -E -i 's/^([A-Za-z]+) ([A-Za-z]+)$/\2, \1/' names.txt
+
+# delete blank lines
+sed -E '/^\s*$/d' file.txt
+
+# uppercase a hex colour
+echo '#abcdef' | sed -E 's/.*/\U&/'`;
+
+const PYTHON_EXAMPLE = String.raw`import re
+
+# Every digit run in a string
+re.findall(r"\d+", "Room 42, floor 7")           # -> ['42', '7']
+
+# Named groups
+m = re.match(r"(?P<year>\d{4})-(?P<month>\d{2})", "2026-05")
+m.group("year"), m.group("month")                  # -> ('2026', '05')
+
+# Replace, with a backreference
+re.sub(r"\b(\w+) \1\b", r"\1", "the the cat")  # -> 'the cat'
+
+# Verbose / commented patterns
+pattern = re.compile(r"""
+    \b           # word boundary
+    \d{4}        # year
+    -
+    \d{2}        # month
+""", re.VERBOSE)`;

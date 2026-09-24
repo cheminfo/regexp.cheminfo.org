@@ -19,8 +19,10 @@
   box-sizing: border-box;
 }
 
-*:focus,
-*:focus-visible {
+/* A copyable value is reached with the keyboard, so it keeps the ring that
+   says where the focus is. */
+*:not(.click-to-copy):focus,
+*:not(.click-to-copy):focus-visible {
   outline: none !important;
 }
 
@@ -329,6 +331,10 @@ body,
   min-height: 1.5em;
 }
 
+.visible-text.click-to-copy--block {
+  padding-right: 22px;
+}
+
 .visible-text.is-inline {
   display: inline-block;
   padding: 0 4px;
@@ -517,6 +523,10 @@ body,
   white-space: pre-wrap;
 }
 
+.match-card-table td.click-to-copy {
+  padding-right: 22px;
+}
+
 .match-card-value code {
   background: white;
   border: 1px solid var(--border);
@@ -539,12 +549,18 @@ body,
   font-style: italic;
 }
 
+/* The right-hand room belongs to the copy glyph, which this padding would
+   otherwise take back from the library. */
 .replace-output {
   margin: 0;
-  padding: 10px;
+  padding: 10px 22px 10px 10px;
   background: #f5f8fa;
   border: 1px solid var(--border);
   border-radius: 3px;
+}
+
+.replace-output pre {
+  margin: 0;
   font-family: var(--font-mono);
   font-size: 13px;
   white-space: pre-wrap;
@@ -707,6 +723,11 @@ body,
   .glossary-page .bp6-heading {
     color: #000 !important;
   }
+}
+
+/* A command block follows the paragraph that introduces it. */
+.about-command {
+  margin-top: 8px;
 }
 
 /* The family strip is drawn by the shared chrome; the page only sets it off

@@ -1,5 +1,6 @@
 import { Tag } from '@blueprintjs/core';
 import { pluralize } from 'react-cheminfo/core';
+import { ClickToCopy } from 'react-cheminfo/ui';
 
 import type { MatchSegment } from '../types.ts';
 
@@ -59,10 +60,32 @@ export function HighlightedText({ segments, count }: Props) {
         })}
       </div>
       <div className="match-summary">
-        <Tag intent={count > 0 ? 'success' : 'none'} minimal>
-          {count} {pluralize(count, 'match', 'matches')}
-        </Tag>
+        <ClickToCopy
+          label="matches, one per line"
+          value={() => matchedLines(segments)}
+          disabled={!hasMatchedText(segments)}
+        >
+          <Tag intent={count > 0 ? 'success' : 'none'} minimal>
+            {count} {pluralize(count, 'match', 'matches')}
+          </Tag>
+        </ClickToCopy>
       </div>
     </>
   );
+}
+
+function matchedLines(segments: MatchSegment[]): string {
+  const lines: string[] = [];
+  for (const segment of segments) {
+    if (segment.isMatch && segment.text !== '') lines.push(segment.text);
+  }
+  return lines.join('\n');
+}
+
+// A run of zero-width matches is counted but holds no text to take away.
+function hasMatchedText(segments: MatchSegment[]): boolean {
+  for (const segment of segments) {
+    if (segment.isMatch && segment.text !== '') return true;
+  }
+  return false;
 }

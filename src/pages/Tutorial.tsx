@@ -13,6 +13,7 @@ import { HighlightedText } from '../components/HighlightedText.tsx';
 import { MatchDetails } from '../components/MatchDetails.tsx';
 import { RegexDiagram } from '../components/RegexDiagram.tsx';
 import { RegexInput } from '../components/RegexInput.tsx';
+import { ReplaceOutput } from '../components/ReplaceOutput.tsx';
 import type { TutorialStep } from '../data/tutorial.ts';
 import {
   TRY_IT_HELP,
@@ -184,7 +185,7 @@ export function Tutorial() {
                 <H4 style={{ fontSize: 13, color: '#5c7080' }}>
                   After replacement
                 </H4>
-                <pre className="replace-output">{replaced}</pre>
+                <ReplaceOutput text={replaced} />
               </div>
             )}
           </Card>
