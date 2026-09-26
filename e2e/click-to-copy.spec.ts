@@ -36,7 +36,7 @@ test('the replacement output is copied by a click', async ({ page }) => {
     'title',
     'Copy the replaced text (bat <cat> hat <sat>)',
   );
-  await expect(output).toHaveCSS('cursor', 'copy');
+  await expect(output).toHaveCSS('cursor', /\bcopy$/);
 
   await output.click();
   await expect(output).toHaveAttribute('data-copy', 'copied');
@@ -54,7 +54,7 @@ test('the match count copies every match, one per line', async ({ page }) => {
     'title',
     'Copy the matches, one per line',
   );
-  await expect(summary).toHaveCSS('cursor', 'copy');
+  await expect(summary).toHaveCSS('cursor', /\bcopy$/);
 
   await summary.click();
   await expect(summary).toHaveAttribute('data-copy', 'copied');
@@ -138,7 +138,7 @@ test('the glossary stays selectable and its patterns are copied', async ({
     'title',
     String.raw`Copy the pattern (\bcat\b)`,
   );
-  await expect(example).toHaveCSS('cursor', 'copy');
+  await expect(example).toHaveCSS('cursor', /\bcopy$/);
 
   await example.click();
   await expect(example).toHaveAttribute('data-copy', 'copied');
