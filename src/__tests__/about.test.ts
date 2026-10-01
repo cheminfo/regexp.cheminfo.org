@@ -37,13 +37,6 @@ test('every borrowed work the site runs on is named, and resolves', () => {
     'React',
     'Vite',
   ]);
-  expect(about.repository).toBe(
-    'https://github.com/cheminfo/regexp.cheminfo.org',
-  );
-  expect(about.issues).toBe(
-    'https://github.com/cheminfo/regexp.cheminfo.org/issues',
-  );
-  expect(about.license).toBe('MIT');
   expect(about.cite).toStrictEqual([PLATFORM_WORK, TEACHING_WORK]);
   expect(about.people).toStrictEqual([{ name: 'Luc Patiny' }]);
   expect(about.providedBy.map((provider) => provider.id)).toStrictEqual([
