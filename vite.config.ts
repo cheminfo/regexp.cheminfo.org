@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import { cheminfoBuildInfo, cheminfoPrerender } from 'react-cheminfo/vite';
 import { defineConfig } from 'vite';
 
+import { pageContent } from './src/state/content.ts';
 import { PAGE_ROUTES, SITE_PAGES } from './src/state/routes.ts';
 import { configuredSiteUrl } from './src/state/sitePath.ts';
 
@@ -25,6 +26,9 @@ export default defineConfig({
     cheminfoPrerender({
       site: 'regexp',
       routes: PAGE_ROUTES,
+      // What each address says for itself. Without it all 25 ship the same
+      // body — this site's menu — and the exercises are near-duplicates.
+      content: pageContent,
       // Origin and mount path together, so every canonical, social card and
       // sitemap entry is written under the address the deployment answers on.
       origin: siteUrl,
